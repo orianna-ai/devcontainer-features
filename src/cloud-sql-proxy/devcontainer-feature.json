@@ -1,0 +1,23 @@
+{
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "googlecloudtools.cloudcode"
+      ]
+    }
+  },
+  "description": "Installs the Google Cloud SQL Proxy",
+  "id": "cloud-sql-proxy",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "Cloud SQL Proxy",
+  "options": {
+    "version": {
+      "default": "latest",
+      "description": "Version of Cloud SQL Proxy to install.",
+      "type": "string"
+    }
+  },
+  "version": "1.0.0"
+}
