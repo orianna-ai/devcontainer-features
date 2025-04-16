@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         features:
-          - chromium
+          - cloud-sql-proxy
         baseImage:
           - debian:latest
           - ubuntu:latest
@@ -34,7 +34,7 @@ jobs:
     strategy:
       matrix:
         features:
-          - chromium
+          - cloud-sql-proxy
     steps:
       - uses: actions/checkout@v4
       - run: npm install -g @devcontainers/cli
