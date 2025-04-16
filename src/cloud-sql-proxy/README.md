@@ -27,4 +27,4 @@ Installs the Google Cloud SQL Proxy
 
 ---
 
-_Note: This file was auto-generated from the [devcontainer-feature.json](devcontainer-feature.json).  Add additional notes to a `NOTES.md`._
+_Note: This file was auto-generated from the [devcontainer-feature.json](https://github.com/orianna-ai/devcontainer-features/blob/main/src/cloud-sql-proxy/devcontainer-feature.json).  Add additional notes to a `NOTES.md`._
