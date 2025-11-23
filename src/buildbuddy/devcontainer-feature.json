@@ -1,0 +1,9 @@
+{
+  "description": "Installs the BuildBuddy CLI",
+  "id": "buildbuddy",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "BuildBuddy",
+  "version": "1.0.0"
+}
