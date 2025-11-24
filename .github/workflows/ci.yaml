@@ -6,7 +6,7 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  test:
+  devcontainer-features:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
