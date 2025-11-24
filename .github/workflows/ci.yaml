@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 jobs:
   devcontainer-features:
-    permissions:      
+    permissions:
       contents: write
       packages: write
       pull-requests: write
