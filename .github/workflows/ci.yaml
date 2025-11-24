@@ -7,9 +7,10 @@ on:
   workflow_dispatch:
 jobs:
   devcontainer-features:
-    permissions:
-      contents: read
+    permissions:      
+      contents: write
       packages: write
+      pull-requests: write
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
