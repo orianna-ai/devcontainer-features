@@ -3,8 +3,10 @@ set -euo pipefail
 
 if [ "${VERSION:-"latest"}" = "latest" ]; then
 	VERSION="$(
-		wget -qO- https://api.github.com/repos/GoogleCloudPlatform/cloud-sql-proxy/releases/latest |
-			grep "tag_name" |
+		wget -qO- 'https://api.github.com/repos/GoogleCloudPlatform/cloud-sql-proxy/releases?per_page=20' |
+			grep '"tag_name"' |
+			grep '"v2\.' |
+			head -1 |
 			cut -d\" -f4 |
 			sed 's/v//'
 	)"
