@@ -4,7 +4,7 @@
       "buildbuddy": {},
       "ghcr.io/devcontainers/features/common-utils:2": {}
     },
-    "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
     "user": "vscode"
   }
 }
