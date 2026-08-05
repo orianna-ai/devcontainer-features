@@ -1,22 +1,3 @@
-
-# Playwright CLI and Chromium (playwright)
-
-Installs the Playwright CLI globally and downloads a Chromium build into a system-wide, HOME-independent browsers directory.
-
-## Example Usage
-
-```json
-"features": {
-    "ghcr.io/orianna-ai/devcontainer-features/playwright:1": {}
-}
-```
-
-## Options
-
-| Options Id | Description | Type | Default Value |
-|-----|-----|-----|-----|
-| version | Version of the @playwright/cli npm package to install globally. | string | latest |
-
 ## Requirements
 
 Node has to be selected too — the feature installs `@playwright/cli` with `npm`, and it fails with
@@ -43,8 +24,3 @@ Browsers land in `/usr/local/share/ms-playwright` rather than Playwright's defau
 because a sandbox may point `HOME` at a per-pod volume — anything baked into the image's home
 directory is invisible there. `PLAYWRIGHT_BROWSERS_PATH` is set through `containerEnv`, so the
 install and every later run agree on that location without any further setup.
-
-
----
-
-_Note: This file was auto-generated from the [devcontainer-feature.json](devcontainer-feature.json).  Add additional notes to a `NOTES.md`._

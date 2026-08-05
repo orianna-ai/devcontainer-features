@@ -16,6 +16,14 @@ BROWSERS_PATH="/usr/local/share/ms-playwright"
 export DEBIAN_FRONTEND=noninteractive
 export PLAYWRIGHT_BROWSERS_PATH="${BROWSERS_PATH}"
 
+# Playwright only knows how to install Chromium's shared libraries with apt, so this feature is
+# Debian and Ubuntu only. Say so before the npm install rather than dying halfway through it.
+if ! command -v apt-get >/dev/null 2>&1; then
+	echo "apt-get was not found; this feature only supports debian and ubuntu base images" >&2
+
+	exit 1
+fi
+
 if ! command -v npm >/dev/null 2>&1; then
 	export NVM_DIR="${NVM_DIR:-/usr/local/share/nvm}"
 
@@ -49,8 +57,7 @@ if [ -z "${playwright_core}" ]; then
 	exit 1
 fi
 
-# install-deps installs Chromium's shared libraries with apt, and an earlier feature may already
-# have dropped the package lists.
+# An earlier feature may already have dropped the package lists that install-deps needs.
 apt-get update -y
 
 node "${playwright_core}" install-deps chromium
