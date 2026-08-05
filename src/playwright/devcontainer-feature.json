@@ -2,21 +2,17 @@
   "containerEnv": {
     "PLAYWRIGHT_BROWSERS_PATH": "/usr/local/share/ms-playwright"
   },
-  "description": "Installs the Playwright CLI globally and downloads a Chromium build into a system-wide, HOME-independent browsers directory.",
+  "description": "Installs the Playwright CLI and Chromium",
   "id": "playwright",
   "installsAfter": [
     "ghcr.io/devcontainers/features/common-utils",
     "ghcr.io/devcontainers/features/node"
   ],
-  "name": "Playwright CLI and Chromium",
+  "name": "Playwright",
   "options": {
     "version": {
       "default": "latest",
-      "description": "Version of the @playwright/cli npm package to install globally.",
-      "proposals": [
-        "latest",
-        "0.1.17"
-      ],
+      "description": "Version of the @playwright/cli package to install.",
       "type": "string"
     }
   },
