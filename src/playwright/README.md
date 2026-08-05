@@ -41,6 +41,12 @@ They live in `/usr/local/share/ms-playwright` rather than Playwright's default `
 `PLAYWRIGHT_BROWSERS_PATH` is set through `containerEnv` to match. Nothing to configure, and it
 keeps working when `HOME` is replaced at run time.
 
+`PLAYWRIGHT_MCP_BROWSER=chromium` is set for the same reason. Left alone, `playwright-cli` opens the
+branded `chrome` channel and looks for it at `/opt/google/chrome/chrome`, which nothing installs —
+so `playwright-cli open` would fail with *"Chromium distribution 'chrome' is not found"* despite a
+perfectly good Chromium sitting in the image. Callers can still override it per command with
+`--browser`.
+
 
 ---
 

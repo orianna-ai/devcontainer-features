@@ -1,6 +1,7 @@
 {
   "containerEnv": {
-    "PLAYWRIGHT_BROWSERS_PATH": "/usr/local/share/ms-playwright"
+    "PLAYWRIGHT_BROWSERS_PATH": "/usr/local/share/ms-playwright",
+    "PLAYWRIGHT_MCP_BROWSER": "chromium"
   },
   "description": "Installs the Playwright CLI and Chromium. Requires the node feature.",
   "id": "playwright",
@@ -16,5 +17,5 @@
       "type": "string"
     }
   },
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
