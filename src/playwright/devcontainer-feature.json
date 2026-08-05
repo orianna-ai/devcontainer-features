@@ -2,7 +2,7 @@
   "containerEnv": {
     "PLAYWRIGHT_BROWSERS_PATH": "/usr/local/share/ms-playwright"
   },
-  "description": "Installs the Playwright CLI and Chromium",
+  "description": "Installs the Playwright CLI and Chromium. Requires the node feature.",
   "id": "playwright",
   "installsAfter": [
     "ghcr.io/devcontainers/features/common-utils",

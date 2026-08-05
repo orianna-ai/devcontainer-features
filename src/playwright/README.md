@@ -1,7 +1,7 @@
 
 # Playwright (playwright)
 
-Installs the Playwright CLI and Chromium
+Installs the Playwright CLI and Chromium. Requires the node feature.
 
 ## Example Usage
 
