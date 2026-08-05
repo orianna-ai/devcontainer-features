@@ -19,8 +19,8 @@ Installs the Playwright CLI and Chromium
 
 ## Requirements
 
-The feature installs `@playwright/cli` with `npm`, so the node feature has to be selected alongside
-it. The install exits with an explicit error when `npm` is missing rather than half-succeeding.
+Select the node feature alongside this one. The install uses `npm` and exits with an explicit error
+when it cannot find it — it never installs node for you, so your own version pin stays intact.
 
 ```json
 "features": {
@@ -29,25 +29,17 @@ it. The install exits with an explicit error when `npm` is missing rather than h
 }
 ```
 
-Node is in `installsAfter` rather than `dependsOn` deliberately: features dedupe only when their id
-*and* options match exactly, so a `dependsOn` entry would install a second copy of the node feature
-for anyone who pins their own version, and whichever copy ran last would win the nvm default.
-
 Debian and Ubuntu only. Playwright installs Chromium's shared libraries with apt and has no
-equivalent for other package managers, so the install fails early on anything else.
+equivalent for other package managers.
 
 ## Browsers
 
-Chromium only, alongside the headless shell and ffmpeg that Playwright pulls with it. Firefox and
-WebKit are not downloaded.
+Chromium only, plus the headless shell and ffmpeg that come with it. Firefox and WebKit are not
+downloaded.
 
-They land in `/usr/local/share/ms-playwright` rather than Playwright's default `$HOME/.cache`,
-because a sandbox may point `HOME` at a per-pod volume, where anything baked into the image's home
-directory is invisible. `PLAYWRIGHT_BROWSERS_PATH` is set through `containerEnv`, so the install and
-every later run agree on that location with no further setup.
-
-The directory is left readable and traversable by the remote user, and the global module tree keeps
-the ownership the node feature gave it, so installing more global packages at run time still works.
+They live in `/usr/local/share/ms-playwright` rather than Playwright's default `$HOME/.cache`, and
+`PLAYWRIGHT_BROWSERS_PATH` is set through `containerEnv` to match. Nothing to configure, and it
+keeps working when `HOME` is replaced at run time.
 
 
 ---
