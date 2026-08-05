@@ -1,6 +1,4 @@
 #!/bin/bash
-# Browsers go to a system-wide directory rather than Playwright's default "$HOME/.cache": a sandbox
-# may point HOME at a per-pod volume, where anything baked into the image's home is invisible.
 set -euo pipefail
 
 VERSION="${VERSION:-latest}"
@@ -26,15 +24,11 @@ if ! command -v npm >/dev/null 2>&1; then
 	exit 1
 fi
 
-# The node feature hands the global module tree to the remote user, who installs more global
-# packages there at run time. Restore that ownership after installing as root.
 npm_root="$(npm root -g)"
 owner="$(stat -c '%u:%g' "${npm_root}")"
 
 npm install --global "@playwright/cli@${VERSION}"
 
-# @playwright/cli links only its own binary; the browser installer lives in its playwright-core
-# dependency, which npm leaves unlinked and may or may not hoist.
 playwright_core="$(find "${npm_root}" -maxdepth 6 -path '*/playwright-core/cli.js' -print -quit)"
 
 if [ -z "${playwright_core}" ]; then
@@ -42,7 +36,6 @@ if [ -z "${playwright_core}" ]; then
 	exit 1
 fi
 
-# install-deps needs package lists that an earlier feature may already have dropped.
 apt-get update -y
 
 node "${playwright_core}" install-deps chromium
