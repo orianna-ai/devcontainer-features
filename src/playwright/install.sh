@@ -48,7 +48,26 @@ node "${playwright_core}" install chromium
 rm -rf /var/lib/apt/lists/*
 npm cache clean --force
 
-ln -sfn "${INSTALL_PATH}/bin/playwright-cli" /usr/local/bin/playwright-cli
+# A symlink would be enough to find the CLI, but not to run it: npm's launcher resolves node through
+# "env", and the callers that most need a stable path — sudo, cron — hand it a PATH with no nvm
+# directory in it. The wrapper resolves node itself, and only when the caller has none, so an
+# ordinary shell still runs the CLI on whichever version it already has active.
+cat >/usr/local/bin/playwright-cli <<EOF
+#!/bin/sh
+if ! command -v node >/dev/null 2>&1; then
+	PATH="\${NVM_DIR:-/usr/local/share/nvm}/current/bin:\${PATH}"
+	export PATH
+fi
 
-chown -R "${owner}" "${INSTALL_PATH}" "${BROWSERS_PATH}"
+# sudo and cron drop containerEnv too, and the browsers are not where playwright looks by default.
+PLAYWRIGHT_BROWSERS_PATH="\${PLAYWRIGHT_BROWSERS_PATH:-${BROWSERS_PATH}}"
+export PLAYWRIGHT_BROWSERS_PATH
+
+exec "${INSTALL_PATH}/bin/playwright-cli" "\$@"
+EOF
+chmod 0755 /usr/local/bin/playwright-cli
+
+# Deliberately not chowned to the remote user: /usr/local/bin/playwright-cli is reachable through
+# sudo, so what it executes stays root-owned and read-only to everyone else.
+chown -R "${owner}" "${BROWSERS_PATH}"
 chmod -R a+rX "${INSTALL_PATH}" "${BROWSERS_PATH}"

@@ -43,8 +43,18 @@ or `nvm use` repoints `current` and `playwright-cli` drops off `PATH` for the wh
 not just the shell that switched.
 
 Switch node freely; one copy of the CLI stays reachable, and it runs on whatever node is active
-(the package needs node 18 or newer). `/usr/local/bin` is also on `sudo`'s `secure_path`, so
-`sudo playwright-cli` resolves too.
+(the package needs node 18 or newer).
+
+`/usr/local/bin/playwright-cli` is a small wrapper rather than a symlink. Finding the CLI is not the
+same as being able to run it: npm's launcher resolves node through `#!/usr/bin/env node`, and the
+callers that most need a fixed path get a `PATH` with no nvm directory in it — `sudo` replaces it
+with `secure_path`, cron starts from almost nothing, and both drop `containerEnv` on the way. The
+wrapper resolves node and `PLAYWRIGHT_BROWSERS_PATH` itself when the caller has neither, so
+`sudo playwright-cli` works. It defers to both when they are already set, so a normal shell still
+runs on the node version it has active.
+
+The wrapper and the package stay root-owned and read-only to the remote user, since `sudo` runs
+whatever they point at as root.
 
 ## Browsers
 
