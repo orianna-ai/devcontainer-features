@@ -3,6 +3,7 @@ set -euo pipefail
 
 VERSION="${VERSION:-latest}"
 BROWSERS_PATH="/usr/local/share/ms-playwright"
+INSTALL_PATH="/usr/local/share/playwright-cli"
 
 export DEBIAN_FRONTEND=noninteractive
 export PLAYWRIGHT_BROWSERS_PATH="${BROWSERS_PATH}"
@@ -24,15 +25,18 @@ if ! command -v npm >/dev/null 2>&1; then
 	exit 1
 fi
 
-npm_root="$(npm root -g)"
-owner="$(stat -c '%u:%g' "${npm_root}")"
+owner="$(stat -c '%u:%g' "$(npm root -g)")"
 
-npm install --global "@playwright/cli@${VERSION}"
+# Not "npm install --global": nvm's global root is one directory per node version, so the package and
+# its bin shim would vanish from PATH the moment someone runs "nvm use" or "nvm install". Own prefix,
+# symlinked into /usr/local/bin, keeps one copy that every node version — and sudo — resolves.
+npm install --global --prefix "${INSTALL_PATH}" "@playwright/cli@${VERSION}"
 
-playwright_core="$(find "${npm_root}" -maxdepth 6 -path '*/playwright-core/cli.js' -print -quit)"
+node_modules="${INSTALL_PATH}/lib/node_modules"
+playwright_core="$(find "${node_modules}" -maxdepth 6 -path '*/playwright-core/cli.js' -print -quit)"
 
 if [ -z "${playwright_core}" ]; then
-	echo "playwright-core was not found under ${npm_root}" >&2
+	echo "playwright-core was not found under ${node_modules}" >&2
 	exit 1
 fi
 
@@ -44,5 +48,7 @@ node "${playwright_core}" install chromium
 rm -rf /var/lib/apt/lists/*
 npm cache clean --force
 
-chown -R "${owner}" "${npm_root}" "$(npm prefix -g)/bin" "${BROWSERS_PATH}"
-chmod -R a+rX "${BROWSERS_PATH}"
+ln -sfn "${INSTALL_PATH}/bin/playwright-cli" /usr/local/bin/playwright-cli
+
+chown -R "${owner}" "${INSTALL_PATH}" "${BROWSERS_PATH}"
+chmod -R a+rX "${INSTALL_PATH}" "${BROWSERS_PATH}"
