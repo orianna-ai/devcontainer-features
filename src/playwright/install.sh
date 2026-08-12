@@ -47,5 +47,8 @@ npm cache clean --force
 
 ln -sfn "${INSTALL_PATH}/bin/playwright-cli" /usr/local/bin/playwright-cli
 
+chown -R root:root "${INSTALL_PATH}"
+chmod -R a+rX,go-w "${INSTALL_PATH}"
+
 chown -R "${owner}" "${BROWSERS_PATH}"
-chmod -R a+rX "${INSTALL_PATH}" "${BROWSERS_PATH}"
+chmod -R a+rX "${BROWSERS_PATH}"
