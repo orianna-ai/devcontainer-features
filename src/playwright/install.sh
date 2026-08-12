@@ -27,9 +27,6 @@ fi
 
 owner="$(stat -c '%u:%g' "$(npm root -g)")"
 
-# Not "npm install --global": nvm's global root is one directory per node version, so the package and
-# its bin shim would vanish from PATH the moment someone runs "nvm use" or "nvm install". Own prefix,
-# symlinked into /usr/local/bin, keeps one copy that every node version resolves.
 npm install --global --prefix "${INSTALL_PATH}" "@playwright/cli@${VERSION}"
 
 node_modules="${INSTALL_PATH}/lib/node_modules"
@@ -50,7 +47,5 @@ npm cache clean --force
 
 ln -sfn "${INSTALL_PATH}/bin/playwright-cli" /usr/local/bin/playwright-cli
 
-# The install stays root-owned: it is shared by every node version now, so no one user should be
-# able to rewrite what everyone else executes.
 chown -R "${owner}" "${BROWSERS_PATH}"
 chmod -R a+rX "${INSTALL_PATH}" "${BROWSERS_PATH}"

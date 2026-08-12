@@ -7,8 +7,6 @@ source \
 
 NVM_DIR="${NVM_DIR:-/usr/local/share/nvm}"
 
-# An "npm install --global" under nvm lands in the active node version's directory, so it is only
-# ever one "nvm use" away from disappearing.
 outside_nvm() {
 	case "$(readlink -f "$(command -v playwright-cli)")" in
 	"${NVM_DIR}"/*) return 1 ;;
@@ -24,7 +22,6 @@ survives_node_switch() {
 		playwright-cli --version
 }
 
-# One install now backs every node version, so no single user should be able to rewrite it.
 not_writable_by_remote_user() {
 	! test -w /usr/local/bin/playwright-cli &&
 		! test -w /usr/local/share/playwright-cli/bin/playwright-cli
@@ -38,6 +35,6 @@ check 'check if the browsers are readable by the remote user' bash -c "test -r /
 check 'check if the browser opens with no --browser flag' bash -c "PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli open && PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli close"
 check 'check if playwright-cli lives outside the nvm version directories' outside_nvm
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
-# Leave this last: it repoints nvm's "current" symlink for every later check in this container.
+# Keep last: repoints nvm's "current" symlink for every later check.
 check 'check if playwright-cli survives a node version switch' survives_node_switch
 reportResults
