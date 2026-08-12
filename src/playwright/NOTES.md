@@ -26,17 +26,14 @@ not just the shell that switched.
 Switch node freely; one copy of the CLI stays reachable, and it runs on whatever node is active
 (the package needs node 18 or newer).
 
-`/usr/local/bin/playwright-cli` is a small wrapper rather than a symlink. Finding the CLI is not the
-same as being able to run it: npm's launcher resolves node through `#!/usr/bin/env node`, and the
-callers that most need a fixed path get a `PATH` with no nvm directory in it — `sudo` replaces it
-with `secure_path`, cron starts from almost nothing, and both drop `containerEnv` on the way. The
-wrapper restores node, `PLAYWRIGHT_BROWSERS_PATH` and `PLAYWRIGHT_MCP_BROWSER` itself when the caller
-is missing them, so `sudo playwright-cli open` finds the bundled Chromium rather than the branded
-`chrome` channel. It defers to each of them when already set, so a normal shell still runs on the
-node version it has active.
+The install stays root-owned and read-only to the remote user. One copy now backs every node
+version, so no single user should be able to rewrite what the others execute.
 
-The wrapper and the package stay root-owned and read-only to the remote user, since `sudo` runs
-whatever they point at as root.
+It runs from environments that inherit `containerEnv`, which is how the CLI finds both node and its
+browsers. `sudo` is not one of them — it replaces `PATH` with `secure_path` and drops `containerEnv`,
+and `sudo playwright-cli` has never worked for this feature. Making it work would mean root
+executing an interpreter and a browser out of trees the remote user owns, so it stays unsupported;
+run the CLI as the remote user.
 
 ## Browsers
 

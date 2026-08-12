@@ -24,16 +24,7 @@ survives_node_switch() {
 		playwright-cli --version
 }
 
-# sudo replaces PATH with secure_path, which has no nvm directory in it, so this fails on a plain
-# symlink to npm's launcher: the CLI resolves and then its "#!/usr/bin/env node" cannot. Opening a
-# browser as well, because sudo drops containerEnv and --version alone never looks for one.
-runs_under_sudo() {
-	sudo -n playwright-cli --version &&
-		sudo -n env PLAYWRIGHT_CLI_SESSION=sudotest playwright-cli open &&
-		sudo -n env PLAYWRIGHT_CLI_SESSION=sudotest playwright-cli close
-}
-
-# ... and what sudo runs as root must not be rewritable by the unprivileged user.
+# One install now backs every node version, so no single user should be able to rewrite it.
 not_writable_by_remote_user() {
 	! test -w /usr/local/bin/playwright-cli &&
 		! test -w /usr/local/share/playwright-cli/bin/playwright-cli
@@ -46,8 +37,7 @@ check 'check if chromium was downloaded' bash -c "ls /usr/local/share/ms-playwri
 check 'check if the browsers are readable by the remote user' bash -c "test -r /usr/local/share/ms-playwright && test -x /usr/local/share/ms-playwright"
 check 'check if the browser opens with no --browser flag' bash -c "PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli open && PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli close"
 check 'check if playwright-cli lives outside the nvm version directories' outside_nvm
-check 'check if playwright-cli runs under sudo' runs_under_sudo
-check 'check if the cli sudo runs is read-only to the remote user' not_writable_by_remote_user
+check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
 # Leave this last: it repoints nvm's "current" symlink for every later check in this container.
 check 'check if playwright-cli survives a node version switch' survives_node_switch
 reportResults
