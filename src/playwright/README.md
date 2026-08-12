@@ -49,9 +49,10 @@ Switch node freely; one copy of the CLI stays reachable, and it runs on whatever
 same as being able to run it: npm's launcher resolves node through `#!/usr/bin/env node`, and the
 callers that most need a fixed path get a `PATH` with no nvm directory in it — `sudo` replaces it
 with `secure_path`, cron starts from almost nothing, and both drop `containerEnv` on the way. The
-wrapper resolves node and `PLAYWRIGHT_BROWSERS_PATH` itself when the caller has neither, so
-`sudo playwright-cli` works. It defers to both when they are already set, so a normal shell still
-runs on the node version it has active.
+wrapper restores node, `PLAYWRIGHT_BROWSERS_PATH` and `PLAYWRIGHT_MCP_BROWSER` itself when the caller
+is missing them, so `sudo playwright-cli open` finds the bundled Chromium rather than the branded
+`chrome` channel. It defers to each of them when already set, so a normal shell still runs on the
+node version it has active.
 
 The wrapper and the package stay root-owned and read-only to the remote user, since `sudo` runs
 whatever they point at as root.

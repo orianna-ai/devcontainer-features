@@ -25,9 +25,12 @@ survives_node_switch() {
 }
 
 # sudo replaces PATH with secure_path, which has no nvm directory in it, so this fails on a plain
-# symlink to npm's launcher: the CLI resolves and then its "#!/usr/bin/env node" cannot.
+# symlink to npm's launcher: the CLI resolves and then its "#!/usr/bin/env node" cannot. Opening a
+# browser as well, because sudo drops containerEnv and --version alone never looks for one.
 runs_under_sudo() {
-	sudo -n playwright-cli --version
+	sudo -n playwright-cli --version &&
+		sudo -n env PLAYWRIGHT_CLI_SESSION=sudotest playwright-cli open &&
+		sudo -n env PLAYWRIGHT_CLI_SESSION=sudotest playwright-cli close
 }
 
 # ... and what sudo runs as root must not be rewritable by the unprivileged user.

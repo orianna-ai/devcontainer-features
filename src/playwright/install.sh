@@ -4,6 +4,7 @@ set -euo pipefail
 VERSION="${VERSION:-latest}"
 BROWSERS_PATH="/usr/local/share/ms-playwright"
 INSTALL_PATH="/usr/local/share/playwright-cli"
+MCP_BROWSER="chromium"
 
 export DEBIAN_FRONTEND=noninteractive
 export PLAYWRIGHT_BROWSERS_PATH="${BROWSERS_PATH}"
@@ -59,9 +60,12 @@ if ! command -v node >/dev/null 2>&1; then
 	export PATH
 fi
 
-# sudo and cron drop containerEnv too, and the browsers are not where playwright looks by default.
+# Those same callers drop containerEnv, which is the only thing pointing the CLI at this image's
+# browsers: without it playwright looks for them under HOME, and defaults to the branded chrome
+# channel at /opt/google/chrome/chrome that nothing here installs.
 PLAYWRIGHT_BROWSERS_PATH="\${PLAYWRIGHT_BROWSERS_PATH:-${BROWSERS_PATH}}"
-export PLAYWRIGHT_BROWSERS_PATH
+PLAYWRIGHT_MCP_BROWSER="\${PLAYWRIGHT_MCP_BROWSER:-${MCP_BROWSER}}"
+export PLAYWRIGHT_BROWSERS_PATH PLAYWRIGHT_MCP_BROWSER
 
 exec "${INSTALL_PATH}/bin/playwright-cli" "\$@"
 EOF
