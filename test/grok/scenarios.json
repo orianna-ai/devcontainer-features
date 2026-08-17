@@ -8,5 +8,15 @@
     },
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
     "user": "vscode"
+  },
+  "ubuntu_pinned": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "grok": {
+        "version": "1.0.4"
+      }
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
   }
 }

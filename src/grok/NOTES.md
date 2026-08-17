@@ -27,10 +27,17 @@ prefix, and deletes the staging directory.
 
 ## Authentication
 
-Nothing is authenticated at build time. The staged `HOME` carries no `.grok/auth.json` and no
-`GROK_DEPLOYMENT_KEY` is set, so the installer takes its unauthenticated path and downloads the
-public stable build. A deployment key present on the build machine cannot end up baked into an
-image layer, and the CLI still reads whatever credentials it is given at run time.
+Nothing is authenticated at build time, and that holds even when the build environment says
+otherwise. A feature inherits the environment it is installed into, so an exported
+`GROK_DEPLOYMENT_KEY` would otherwise make the installer authenticate and POST that key as a bearer
+token to `${GROK_PROXY_URL:-https://cli-chat-proxy.grok.com/v1}/deployment/config` — a credential
+sent to whatever endpoint an inherited `GROK_PROXY_URL` named. The installer is therefore run with
+`GROK_DEPLOYMENT_KEY`, `GROK_PROXY_URL`, `GROK_CHANNEL`, and `GROK_BIN_DIR` cleared, over a staged
+`HOME` holding no `.grok/auth.json`, leaving it only its unauthenticated path to the public stable
+build.
+
+Nothing is read, so nothing can be baked into an image layer, and the CLI still reads whatever
+credentials it is given at run time.
 
 The upstream installer also honors `GROK_CHANNEL` for alpha and enterprise builds. This feature
 does not expose it: the enterprise channel needs a deployment key a feature has no way to carry,

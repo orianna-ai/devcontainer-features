@@ -28,16 +28,30 @@ curl -fsSL "${INSTALLER_URL}" -o "${staging}/install.sh"
 # entry it finds — /usr/local/bin during an image build — aimed at the staging directory, which
 # then dangles the moment staging is removed. Putting it on PATH takes that branch away.
 #
-# The staged HOME has no ".grok/auth.json", and no GROK_DEPLOYMENT_KEY is set, so the installer
-# takes its unauthenticated path and pulls the public stable build — a credential on the build
-# machine can never leak into the image.
+# Every GROK_* variable the installer reads is cleared rather than merely left unset here, because
+# a feature inherits the build environment: a base image or an earlier layer that exports one would
+# otherwise reach in and change what this builds. GROK_DEPLOYMENT_KEY makes the installer
+# authenticate and POST that key as a bearer token to "${GROK_PROXY_URL}/deployment/config", so an
+# inherited pair of those two would send a credential to whatever endpoint the environment named.
+# GROK_CHANNEL would swap the public stable build for another channel, and GROK_BIN_DIR would move
+# the bin directory out of the staging tree, breaking both the PATH suppression above and the copy
+# below. With all four cleared and a staged HOME holding no ".grok/auth.json", the installer can
+# only take its unauthenticated path to the public stable build.
+run_installer() {
+	env -u GROK_DEPLOYMENT_KEY -u GROK_PROXY_URL -u GROK_CHANNEL -u GROK_BIN_DIR \
+		HOME="${staging}" PATH="${staged_bin}:${PATH}" \
+		bash "${staging}/install.sh" "$@"
+}
+
 if [ "${VERSION}" = "latest" ]; then
-	HOME="${staging}" PATH="${staged_bin}:${PATH}" bash "${staging}/install.sh"
+	run_installer
 else
-	HOME="${staging}" PATH="${staged_bin}:${PATH}" bash "${staging}/install.sh" "${VERSION}"
+	run_installer "${VERSION}"
 fi
 
-binary="$(readlink -f "${staged_bin}/grok")"
+# "|| true" so the check below reports the problem: readlink exits nonzero when a parent component
+# is missing, which under "set -e" would kill the script with no diagnostic of its own.
+binary="$(readlink -f "${staged_bin}/grok" || true)"
 
 if [ ! -x "${binary}" ]; then
 	echo "the grok installer left no runnable binary at ${staged_bin}/grok" >&2
