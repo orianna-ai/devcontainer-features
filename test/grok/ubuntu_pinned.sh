@@ -5,9 +5,7 @@ set -e
 source \
 	dev-container-features-test-lib
 
-# The version pinned in scenarios.json. An exact version takes a different branch of install.sh
-# than the default "latest" — it is passed to the upstream installer as a positional argument — so
-# this covers the contract that branch depends on. Bump both if this build is ever withdrawn.
+# Matches scenarios.json; bump both together if this build is ever withdrawn.
 PINNED_VERSION=1.0.4
 
 installs_the_pinned_version() {

@@ -7,9 +7,7 @@ source \
 
 INSTALL_PATH=/usr/local/share/grok
 
-# The installer's own layout leaves the real binary in the installing user's home and only a
-# symlink in the bin directory, which the remote user cannot read. Resolving the link has to land
-# on a runnable file inside the shared prefix, never in a home directory.
+# Guards the installer's own layout, which leaves the binary in a home directory.
 resolves_inside_the_shared_prefix() {
 	resolved="$(readlink -f "$(command -v grok)")" || return 1
 	test -x "${resolved}" || return 1
