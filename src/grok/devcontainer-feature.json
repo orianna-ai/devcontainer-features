@@ -1,0 +1,16 @@
+{
+  "description": "Installs the Grok CLI from x.ai.",
+  "id": "grok",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "Grok CLI",
+  "options": {
+    "version": {
+      "default": "latest",
+      "description": "Version of the grok CLI to install, as X.Y.Z, or latest for the newest stable build.",
+      "type": "string"
+    }
+  },
+  "version": "1.0.0"
+}
