@@ -25,7 +25,9 @@ active at build time, so `nvm install` or `nvm use` repoints `current` and
 switched.
 
 Switch node freely; one copy of the server stays reachable, and it runs on whatever node is active
-(the package needs node 20 or newer).
+(the package needs node 20 or newer). The install passes `--engine-strict` to npm, so building
+against a node too old for the packages fails the image build with npm's explicit engine error
+instead of producing a server that cannot start.
 
 The install stays root-owned and read-only to the remote user. One copy backs every node version,
 so no single user should be able to rewrite what the others execute.

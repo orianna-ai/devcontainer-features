@@ -17,7 +17,7 @@ if ! command -v npm >/dev/null 2>&1; then
 	exit 1
 fi
 
-npm install --global --prefix "${INSTALL_PATH}" \
+npm install --global --engine-strict --prefix "${INSTALL_PATH}" \
 	"typescript-language-server@${VERSION}" \
 	"typescript@${TYPESCRIPT_VERSION}"
 
