@@ -43,6 +43,12 @@ the symlink and leaves the binary behind it in root's home. The feature instead 
 lets the installer lay out both halves inside it, copies the resolved binary into the shared
 prefix, and deletes the staging directory.
 
+The staged bin directory goes on `PATH` for a second reason. When its own bin directory is not
+already on `PATH`, the installer symlinks both `grok` and `agent` into the first writable `PATH`
+entry it finds — `/usr/local/bin` during an image build — pointing them at the staging directory,
+which dangles the moment staging is removed. On `PATH`, that branch does not run; any such link
+that survives a change upstream is removed before the real symlink is written.
+
 ## Authentication
 
 Nothing is authenticated at build time, and that holds even when the build environment says
