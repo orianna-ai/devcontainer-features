@@ -1,0 +1,13 @@
+{
+  "ubuntu": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "ghcr.io/devcontainers/features/node:2": {},
+      "typescript-language-server": {
+        "version": "latest"
+      }
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  }
+}
