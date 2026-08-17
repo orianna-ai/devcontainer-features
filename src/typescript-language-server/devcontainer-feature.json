@@ -1,0 +1,22 @@
+{
+  "description": "Installs the TypeScript language server for LSP clients. Requires the node feature.",
+  "id": "typescript-language-server",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils",
+    "ghcr.io/devcontainers/features/node"
+  ],
+  "name": "TypeScript Language Server",
+  "options": {
+    "typescriptVersion": {
+      "default": "6",
+      "description": "Version of the typescript package that backs the server when the workspace has none. TypeScript 7+ is the native rewrite without tsserver and cannot back this server.",
+      "type": "string"
+    },
+    "version": {
+      "default": "latest",
+      "description": "Version of the typescript-language-server package to install.",
+      "type": "string"
+    }
+  },
+  "version": "1.0.0"
+}
