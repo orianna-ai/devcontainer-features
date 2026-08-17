@@ -1,0 +1,12 @@
+{
+  "ubuntu": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "grok": {
+        "version": "latest"
+      }
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  }
+}
