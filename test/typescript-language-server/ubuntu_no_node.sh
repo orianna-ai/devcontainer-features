@@ -17,8 +17,6 @@ no_node_on_path() {
 		! command -v npm >/dev/null 2>&1
 }
 
-# Drives the server over LSP stdio with the private runtime's node as the test client — the image
-# has no other node — and succeeds once a diagnostic arrives for the broken file.
 publishes_diagnostics() {
 	workspace="$(mktemp -d)" &&
 		"$(runtime_node)" - "$workspace" <<-'EOF'

@@ -21,10 +21,6 @@ if ! command -v curl >/dev/null 2>&1; then
 	exit 1
 fi
 
-# Install a private node runtime under its own root-owned prefix. The CLI must keep running when
-# a workspace mutates the container's node however it likes — nvm/fnm/mise switches, uninstalls,
-# even wiping the install — so it can never resolve its interpreter from PATH. Keyed by version so
-# sibling features pinning the same NODE_VERSION share one copy without racing on contents.
 install_node_runtime() {
 	if [ -x "${NODE}" ]; then
 		return
@@ -56,9 +52,6 @@ install_node_runtime() {
 	chmod -R a+rX,go-w "${RUNTIME}"
 }
 
-# Run the private runtime's own npm, so the install works on images with no node at all. The
-# runtime's bin dir is prepended to PATH for any lifecycle script npm spawns; the cache is kept out
-# of the image.
 npm() {
 	env PATH="${RUNTIME}/bin:${PATH}" npm_config_cache="${npm_cache}" \
 		"${NODE}" "${RUNTIME}/lib/node_modules/npm/bin/npm-cli.js" "$@"
@@ -86,9 +79,6 @@ apt-get update -y
 
 rm -rf /var/lib/apt/lists/*
 
-# A wrapper rather than a symlink to the npm shim: the shim's `#!/usr/bin/env node` shebang would
-# resolve the interpreter from the caller's PATH at spawn time, which is exactly the dependency
-# this feature exists to remove.
 cat >/usr/local/bin/playwright-cli <<EOF
 #!/bin/sh
 exec "${NODE}" "${INSTALL_PATH}/bin/playwright-cli" "\$@"

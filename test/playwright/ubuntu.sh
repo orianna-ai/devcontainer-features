@@ -50,9 +50,7 @@ check 'check if the browsers are readable by the remote user' bash -c "test -r /
 check 'check if the browser opens with no --browser flag' bash -c "PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli open && PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli close"
 check 'check if playwright-cli lives outside the nvm version directories' outside_nvm
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
-# Destructive checks last: the first repoints nvm's "current" symlink, the second deletes nvm
-# outright — the failure mode that took down playwright-cli in production when its interpreter was
-# still resolved from PATH.
+# Keep last: these repoint and then delete nvm for every later check.
 check 'check if playwright-cli survives a node version switch' survives_node_switch
 check 'check if playwright-cli survives deleting nvm entirely' survives_nvm_wipe
 reportResults

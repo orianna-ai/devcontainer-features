@@ -28,8 +28,6 @@ finds_fallback_tsserver() {
 	"
 }
 
-# Drives the server over LSP stdio with the given node binary as the test client, and succeeds once
-# a diagnostic arrives for the broken file.
 publishes_diagnostics() {
 	driver="$1"
 	workspace="$(mktemp -d)" &&
@@ -97,9 +95,7 @@ check 'check if a fallback tsserver resolves from the server tree' finds_fallbac
 check 'check if the server publishes diagnostics in a workspace with no typescript' publishes_diagnostics node
 check 'check if typescript-language-server lives outside the nvm version directories' outside_nvm
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
-# Destructive checks last: the first repoints nvm's "current" symlink, the second deletes nvm
-# outright — the failure mode that took down node CLIs in production when their interpreter was
-# still resolved from PATH.
+# Keep last: these repoint and then delete nvm for every later check.
 check 'check if typescript-language-server survives a node version switch' survives_node_switch
 check 'check if typescript-language-server survives deleting nvm entirely' survives_nvm_wipe
 reportResults
