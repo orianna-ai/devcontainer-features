@@ -5,6 +5,9 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 jobs:
   devcontainer-features:
     permissions:
