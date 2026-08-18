@@ -5,7 +5,6 @@ set -e
 source \
 	dev-container-features-test-lib
 
-NVM_DIR="${NVM_DIR:-/usr/local/share/nvm}"
 INSTALL_PATH=/usr/local/share/typescript-language-server
 
 runtime_node() {
@@ -13,25 +12,14 @@ runtime_node() {
 	echo "$1"
 }
 
-outside_nvm() {
-	case "$(readlink -f "$(command -v typescript-language-server)")" in
-	"${NVM_DIR}"/*) return 1 ;;
-	esac
-}
-
-finds_fallback_tsserver() {
-	"$(runtime_node)" -e "
-		const path = require('node:path');
-		const server = '${INSTALL_PATH}/lib/node_modules/typescript-language-server/lib/cli.mjs';
-		const typescript = require('node:module').createRequire(server).resolve('typescript');
-		require('node:fs').accessSync(path.join(path.dirname(typescript), 'tsserver.js'));
-	"
+no_node_on_path() {
+	! command -v node >/dev/null 2>&1 &&
+		! command -v npm >/dev/null 2>&1
 }
 
 publishes_diagnostics() {
-	driver="$1"
 	workspace="$(mktemp -d)" &&
-		"${driver}" - "$workspace" <<-'EOF'
+		"$(runtime_node)" - "$workspace" <<-'EOF'
 			const { spawn } = require('node:child_process');
 			const workspace = process.argv[2];
 			const uri = 'file://' + workspace + '/main.ts';
@@ -72,30 +60,9 @@ not_writable_by_remote_user() {
 		! test -w "$(runtime_node)"
 }
 
-survives_node_switch() {
-	# shellcheck source=/dev/null
-	. "${NVM_DIR}/nvm.sh" &&
-		nvm install 20 >/dev/null &&
-		nvm use 20 >/dev/null &&
-		test "$(node -v | cut -d. -f1)" = v20 &&
-		typescript-language-server --version
-}
-
-survives_nvm_wipe() {
-	sudo rm -rf "${NVM_DIR}" &&
-		hash -r &&
-		! command -v node >/dev/null 2>&1 &&
-		typescript-language-server --version &&
-		publishes_diagnostics "$(runtime_node)"
-}
-
+check 'check the image has no node of its own' no_node_on_path
 check 'check if typescript-language-server exists' bash -c "command -v typescript-language-server"
 check 'check if typescript-language-server runs' bash -c "typescript-language-server --version"
-check 'check if a fallback tsserver resolves from the server tree' finds_fallback_tsserver
-check 'check if the server publishes diagnostics in a workspace with no typescript' publishes_diagnostics node
-check 'check if typescript-language-server lives outside the nvm version directories' outside_nvm
+check 'check if the server publishes diagnostics in a workspace with no typescript' publishes_diagnostics
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
-# Keep last: these repoint and then delete nvm for every later check.
-check 'check if typescript-language-server survives a node version switch' survives_node_switch
-check 'check if typescript-language-server survives deleting nvm entirely' survives_nvm_wipe
 reportResults

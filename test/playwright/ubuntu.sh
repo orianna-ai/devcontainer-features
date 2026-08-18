@@ -7,6 +7,11 @@ source \
 
 NVM_DIR="${NVM_DIR:-/usr/local/share/nvm}"
 
+runtime_node() {
+	set -- /usr/local/share/node-runtime/v*/bin/node
+	echo "$1"
+}
+
 outside_nvm() {
 	case "$(readlink -f "$(command -v playwright-cli)")" in
 	"${NVM_DIR}"/*) return 1 ;;
@@ -22,9 +27,19 @@ survives_node_switch() {
 		playwright-cli --version
 }
 
+survives_nvm_wipe() {
+	sudo rm -rf "${NVM_DIR}" &&
+		hash -r &&
+		! command -v node >/dev/null 2>&1 &&
+		playwright-cli --version &&
+		PLAYWRIGHT_CLI_SESSION=featurewipe playwright-cli open &&
+		PLAYWRIGHT_CLI_SESSION=featurewipe playwright-cli close
+}
+
 not_writable_by_remote_user() {
 	! test -w /usr/local/bin/playwright-cli &&
-		! test -w /usr/local/share/playwright-cli/bin/playwright-cli
+		! test -w /usr/local/share/playwright-cli/bin/playwright-cli &&
+		! test -w "$(runtime_node)"
 }
 
 check 'check if playwright-cli exists' bash -c "command -v playwright-cli"
@@ -35,6 +50,7 @@ check 'check if the browsers are readable by the remote user' bash -c "test -r /
 check 'check if the browser opens with no --browser flag' bash -c "PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli open && PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli close"
 check 'check if playwright-cli lives outside the nvm version directories' outside_nvm
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
-# Keep last: repoints nvm's "current" symlink for every later check.
+# Keep last: these repoint and then delete nvm for every later check.
 check 'check if playwright-cli survives a node version switch' survives_node_switch
+check 'check if playwright-cli survives deleting nvm entirely' survives_nvm_wipe
 reportResults

@@ -1,14 +1,16 @@
 ## Requirements
 
-Select the node feature alongside this one. The install uses `npm` and exits with an explicit error
-when it cannot find it — it never installs node for you, so your own version pin stays intact.
+None beyond the base image: the feature brings its own node, so it works with or without the node
+feature, and nothing a workspace later does to the image's node can affect it.
 
 ```json
 "features": {
-    "ghcr.io/devcontainers/features/node:2": {},
     "ghcr.io/orianna-ai/devcontainer-features/typescript-language-server:1": {}
 }
 ```
+
+Debian and Ubuntu only. The private runtime is node's glibc Linux build, with the architecture
+detected through `dpkg`; there is no musl build wired up for Alpine.
 
 The server is what LSP clients spawn as `typescript-language-server --stdio` — editors, and
 Claude Code's TypeScript LSP plugin, need only this binary on `PATH`.
@@ -16,24 +18,26 @@ Claude Code's TypeScript LSP plugin, need only this binary on `PATH`.
 ## Node versions
 
 The server is installed under its own prefix, `/usr/local/share/typescript-language-server`, and
-symlinked to `/usr/local/bin/typescript-language-server`. It is deliberately not a plain
-`npm install --global`: the node feature installs node through nvm, whose global root is one
-directory per node version (`$NVM_DIR/versions/node/<version>/lib/node_modules`), with
-`$NVM_DIR/current/bin` on `PATH`. A `npm install --global` there belongs to whichever version was
-active at build time, so `nvm install` or `nvm use` repoints `current` and
-`typescript-language-server` drops off `PATH` for the whole container — not just the shell that
-switched.
+runs on a private node runtime at `/usr/local/share/node-runtime/v<nodeVersion>` (fetched from
+nodejs.org and checksum-verified at build time). `/usr/local/bin/typescript-language-server` is a
+wrapper that execs that runtime by absolute path — deliberately not a symlink to the npm shim,
+whose `#!/usr/bin/env node` shebang would resolve the interpreter from the caller's `PATH` at
+spawn time.
 
-Switch node freely; one copy of the server stays reachable, and it runs on whatever node is active
-(the package needs node 20 or newer). The install passes `--engine-strict` to npm, so building
-against a node too old for the packages fails the image build with npm's explicit engine error
-instead of producing a server that cannot start.
+That makes the server independent of the container's node end to end. `nvm install` / `nvm use`
+repointing nvm's `current` symlink, `nvm uninstall` of the build-time version, switching to fnm or
+mise, or deleting the nvm tree outright: none of it can break the server, because nothing it runs
+is looked up through `PATH` or nvm. tsserver is spawned through `fork()`, which reuses the running
+interpreter, so it stays on the private runtime too.
 
-The install stays root-owned and read-only to the remote user. One copy backs every node version,
-so no single user should be able to rewrite what the others execute.
+Sibling features of this repository that pin the same `nodeVersion` share one runtime copy.
 
-Like the playwright feature, it resolves node from the caller's `PATH`, so `sudo` — which replaces
-`PATH` with `secure_path` — is unsupported; run the server as the remote user.
+The install passes `--engine-strict` to npm, so building against a runtime too old for the packages
+fails the image build with npm's explicit engine error instead of producing a server that cannot
+start.
+
+The install stays root-owned and read-only to the remote user — the runtime included, so no
+workspace user can rewrite the interpreter others execute.
 
 ## TypeScript ("tsserver")
 
@@ -49,6 +53,6 @@ that cannot work: the server runs `typescript/lib/tsserver.js`, which TypeScript
 initialize with *"Could not find a valid TypeScript installation"*. Pin `typescriptVersion`
 anywhere in 5.x or 6.x freely.
 
-Only `typescript-language-server` is symlinked into `/usr/local/bin`. The fallback's `tsc` and
+Only `typescript-language-server` gets an entry point in `/usr/local/bin`. The fallback's `tsc` and
 `tsserver` stay private to the prefix rather than shadowing whatever the active node version or the
 workspace provides.
