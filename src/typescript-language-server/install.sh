@@ -8,6 +8,11 @@ INSTALL_PATH="/usr/local/share/typescript-language-server"
 RUNTIME="/usr/local/share/node-runtime/v${NODE_VERSION}"
 NODE="${RUNTIME}/bin/node"
 
+if ! command -v dpkg >/dev/null 2>&1; then
+	echo "dpkg was not found; this feature only supports debian and ubuntu base images" >&2
+	exit 1
+fi
+
 if ! command -v curl >/dev/null 2>&1; then
 	echo "curl was not found; it is needed to fetch the private node runtime" >&2
 	exit 1

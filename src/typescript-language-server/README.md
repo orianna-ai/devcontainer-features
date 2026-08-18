@@ -30,6 +30,9 @@ feature, and nothing a workspace later does to the image's node can affect it.
 }
 ```
 
+Debian and Ubuntu only. The private runtime is node's glibc Linux build, with the architecture
+detected through `dpkg`; there is no musl build wired up for Alpine.
+
 The server is what LSP clients spawn as `typescript-language-server --stdio` — editors, and
 Claude Code's TypeScript LSP plugin, need only this binary on `PATH`.
 
