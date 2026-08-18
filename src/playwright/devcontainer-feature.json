@@ -3,19 +3,23 @@
     "PLAYWRIGHT_BROWSERS_PATH": "/usr/local/share/ms-playwright",
     "PLAYWRIGHT_MCP_BROWSER": "chromium"
   },
-  "description": "Installs the Playwright CLI and Chromium. Requires the node feature.",
+  "description": "Installs the Playwright CLI and Chromium on a private node runtime, independent of any node in the image.",
   "id": "playwright",
   "installsAfter": [
-    "ghcr.io/devcontainers/features/common-utils",
-    "ghcr.io/devcontainers/features/node"
+    "ghcr.io/devcontainers/features/common-utils"
   ],
   "name": "Playwright",
   "options": {
+    "nodeVersion": {
+      "default": "24.18.0",
+      "description": "Version of the private node runtime that runs the CLI, as X.Y.Z. Features pinning the same version share one runtime copy.",
+      "type": "string"
+    },
     "version": {
       "default": "latest",
       "description": "Version of the @playwright/cli package to install.",
       "type": "string"
     }
   },
-  "version": "1.2.0"
+  "version": "1.3.0"
 }

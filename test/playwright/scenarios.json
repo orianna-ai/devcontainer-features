@@ -9,5 +9,15 @@
     },
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
     "user": "vscode"
+  },
+  "ubuntu_no_node": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "playwright": {
+        "version": "latest"
+      }
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
   }
 }

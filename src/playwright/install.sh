@@ -2,8 +2,11 @@
 set -euo pipefail
 
 VERSION="${VERSION:-latest}"
+NODE_VERSION="${NODEVERSION:-24.18.0}"
 BROWSERS_PATH="/usr/local/share/ms-playwright"
 INSTALL_PATH="/usr/local/share/playwright-cli"
+RUNTIME="/usr/local/share/node-runtime/v${NODE_VERSION}"
+NODE="${RUNTIME}/bin/node"
 
 export DEBIAN_FRONTEND=noninteractive
 export PLAYWRIGHT_BROWSERS_PATH="${BROWSERS_PATH}"
@@ -13,19 +16,58 @@ if ! command -v apt-get >/dev/null 2>&1; then
 	exit 1
 fi
 
-if ! command -v npm >/dev/null 2>&1; then
-	export NVM_DIR="${NVM_DIR:-/usr/local/share/nvm}"
-
-	# shellcheck source=/dev/null
-	[ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"
-fi
-
-if ! command -v npm >/dev/null 2>&1; then
-	echo "npm was not found; this feature has to install after the node feature" >&2
+if ! command -v curl >/dev/null 2>&1; then
+	echo "curl was not found; it is needed to fetch the private node runtime" >&2
 	exit 1
 fi
 
-owner="$(stat -c '%u:%g' "$(npm root -g)")"
+# Install a private node runtime under its own root-owned prefix. The CLI must keep running when
+# a workspace mutates the container's node however it likes — nvm/fnm/mise switches, uninstalls,
+# even wiping the install — so it can never resolve its interpreter from PATH. Keyed by version so
+# sibling features pinning the same NODE_VERSION share one copy without racing on contents.
+install_node_runtime() {
+	if [ -x "${NODE}" ]; then
+		return
+	fi
+
+	local arch
+	case "$(dpkg --print-architecture)" in
+	amd64) arch=x64 ;;
+	arm64) arch=arm64 ;;
+	*)
+		echo "unsupported architecture $(dpkg --print-architecture); node ships linux builds for amd64 and arm64 only" >&2
+		exit 1
+		;;
+	esac
+
+	local staging tarball
+	staging="$(mktemp -d)"
+	tarball="node-v${NODE_VERSION}-linux-${arch}.tar.gz"
+
+	curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/${tarball}" -o "${staging}/${tarball}"
+	curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt" -o "${staging}/SHASUMS256.txt"
+	(cd "${staging}" && grep " ${tarball}\$" SHASUMS256.txt | sha256sum -c -)
+
+	mkdir -p "${RUNTIME}"
+	tar -xzf "${staging}/${tarball}" -C "${RUNTIME}" --strip-components=1
+	rm -rf "${staging}"
+
+	chown -R root:root "${RUNTIME}"
+	chmod -R a+rX,go-w "${RUNTIME}"
+}
+
+# Run the private runtime's own npm, so the install works on images with no node at all. The
+# runtime's bin dir is prepended to PATH for any lifecycle script npm spawns; the cache is kept out
+# of the image.
+npm() {
+	env PATH="${RUNTIME}/bin:${PATH}" npm_config_cache="${npm_cache}" \
+		"${NODE}" "${RUNTIME}/lib/node_modules/npm/bin/npm-cli.js" "$@"
+}
+
+install_node_runtime
+
+npm_cache="$(mktemp -d)"
+trap 'rm -rf "${npm_cache}"' EXIT
 
 npm install --global --prefix "${INSTALL_PATH}" "@playwright/cli@${VERSION}"
 
@@ -39,16 +81,27 @@ fi
 
 apt-get update -y
 
-node "${playwright_core}" install-deps chromium
-node "${playwright_core}" install chromium
+"${NODE}" "${playwright_core}" install-deps chromium
+"${NODE}" "${playwright_core}" install chromium
 
 rm -rf /var/lib/apt/lists/*
-npm cache clean --force
 
-ln -sfn "${INSTALL_PATH}/bin/playwright-cli" /usr/local/bin/playwright-cli
+# A wrapper rather than a symlink to the npm shim: the shim's `#!/usr/bin/env node` shebang would
+# resolve the interpreter from the caller's PATH at spawn time, which is exactly the dependency
+# this feature exists to remove.
+cat >/usr/local/bin/playwright-cli <<EOF
+#!/bin/sh
+exec "${NODE}" "${INSTALL_PATH}/bin/playwright-cli" "\$@"
+EOF
+chmod 0755 /usr/local/bin/playwright-cli
 
 chown -R root:root "${INSTALL_PATH}"
 chmod -R a+rX,go-w "${INSTALL_PATH}"
 
-chown -R "${owner}" "${BROWSERS_PATH}"
+remote_user="${_REMOTE_USER:-root}"
+if ! id -u "${remote_user}" >/dev/null 2>&1; then
+	remote_user=root
+fi
+
+chown -R "${remote_user}" "${BROWSERS_PATH}"
 chmod -R a+rX "${BROWSERS_PATH}"

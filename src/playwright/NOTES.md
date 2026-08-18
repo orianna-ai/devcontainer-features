@@ -1,11 +1,10 @@
 ## Requirements
 
-Select the node feature alongside this one. The install uses `npm` and exits with an explicit error
-when it cannot find it — it never installs node for you, so your own version pin stays intact.
+None beyond the base image: the feature brings its own node, so it works with or without the node
+feature, and nothing a workspace later does to the image's node can affect it.
 
 ```json
 "features": {
-    "ghcr.io/devcontainers/features/node:2": {},
     "ghcr.io/orianna-ai/devcontainer-features/playwright:1": {}
 }
 ```
@@ -15,25 +14,26 @@ equivalent for other package managers.
 
 ## Node versions
 
-The CLI is installed under its own prefix, `/usr/local/share/playwright-cli`, and symlinked to
-`/usr/local/bin/playwright-cli`. It is deliberately not a plain `npm install --global`: the node
-feature installs node through nvm, whose global root is one directory per node version
-(`$NVM_DIR/versions/node/<version>/lib/node_modules`), with `$NVM_DIR/current/bin` on `PATH`. A
-`npm install --global` there belongs to whichever version was active at build time, so `nvm install`
-or `nvm use` repoints `current` and `playwright-cli` drops off `PATH` for the whole container —
-not just the shell that switched.
+The CLI is installed under its own prefix, `/usr/local/share/playwright-cli`, and runs on a private
+node runtime at `/usr/local/share/node-runtime/v<nodeVersion>` (fetched from nodejs.org and
+checksum-verified at build time). `/usr/local/bin/playwright-cli` is a wrapper that execs that
+runtime by absolute path — deliberately not a symlink to the npm shim, whose `#!/usr/bin/env node`
+shebang would resolve the interpreter from the caller's `PATH` at spawn time.
 
-Switch node freely; one copy of the CLI stays reachable, and it runs on whatever node is active
-(the package needs node 18 or newer).
+That makes the CLI independent of the container's node end to end. `nvm install` / `nvm use`
+repointing nvm's `current` symlink, `nvm uninstall` of the build-time version, switching to fnm or
+mise, or deleting the nvm tree outright: none of it can break the CLI, because nothing it runs is
+looked up through `PATH` or nvm. Playwright spawns its own child processes through
+`process.execPath`, so they stay on the private runtime too.
 
-The install stays root-owned and read-only to the remote user. One copy now backs every node
-version, so no single user should be able to rewrite what the others execute.
+Sibling features of this repository that pin the same `nodeVersion` share one runtime copy.
 
-It runs from environments that inherit `containerEnv`, which is how the CLI finds both node and its
-browsers. `sudo` is not one of them — it replaces `PATH` with `secure_path` and drops `containerEnv`,
-and `sudo playwright-cli` has never worked for this feature. Making it work would mean root
-executing an interpreter and a browser out of trees the remote user owns, so it stays unsupported;
-run the CLI as the remote user.
+The install stays root-owned and read-only to the remote user — the runtime included, so no
+workspace user can rewrite the interpreter others execute.
+
+The CLI no longer needs `PATH` to find node, but it still reads `PLAYWRIGHT_BROWSERS_PATH` and
+`PLAYWRIGHT_MCP_BROWSER` from `containerEnv`. `sudo` drops `containerEnv`, so `sudo playwright-cli`
+stays unsupported; run the CLI as the remote user.
 
 ## Browsers
 
