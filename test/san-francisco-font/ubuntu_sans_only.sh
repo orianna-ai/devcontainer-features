@@ -7,7 +7,6 @@ source \
 
 INSTALL_PATH=/usr/local/share/fonts/san-francisco
 
-# See ubuntu.sh: an unescaped hyphen starts fc-match's property list.
 resolves() {
 	local requested="$1" expected="$2"
 	test "$(fc-match --format '%{family[0]}' "${requested//-/\\-}")" = "${expected}"

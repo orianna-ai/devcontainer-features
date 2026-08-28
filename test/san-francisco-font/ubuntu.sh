@@ -7,7 +7,6 @@ source \
 
 INSTALL_PATH=/usr/local/share/fonts/san-francisco
 
-# An unescaped hyphen starts fc-match's property list, so "system-ui" would ask for "system".
 resolves() {
 	local requested="$1" expected="$2"
 	test "$(fc-match --format '%{family[0]}' "${requested//-/\\-}")" = "${expected}"
@@ -19,7 +18,6 @@ installed() {
 		ls "${INSTALL_PATH}"/SF-Mono-*.otf >/dev/null 2>&1
 }
 
-# Guards the variable font's named instances, without which every weight collapses onto Regular.
 has_every_weight() {
 	local style
 	for style in Ultralight Regular Semibold Bold Black; do
