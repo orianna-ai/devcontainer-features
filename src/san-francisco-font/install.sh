@@ -126,6 +126,19 @@ override() {
 EOF
 }
 
+reject_width() {
+	cat <<EOF
+  <selectfont>
+    <rejectfont>
+      <pattern>
+        <patelt name="family"><string>$1</string></patelt>
+        <patelt name="width"><int>$2</int></patelt>
+      </pattern>
+    </rejectfont>
+  </selectfont>
+EOF
+}
+
 rm -rf "${INSTALL_PATH}"
 mkdir -p "${INSTALL_PATH}"
 
@@ -143,7 +156,11 @@ mkdir -p "$(dirname "${CONFIG_PATH}")" "$(dirname "${CONFIG_LINK}")"
 	echo '<fontconfig>'
 	echo "  <dir>${INSTALL_PATH}</dir>"
 
-	for family in system-ui -apple-system BlinkMacSystemFont .AppleSystemUIFont \
+	for width in 47 60 132; do
+		reject_width 'SF Pro' "${width}"
+	done
+
+	for family in system-ui ui-sans-serif -apple-system BlinkMacSystemFont .AppleSystemUIFont \
 		'.SF NS' '.SF NS Text' '.SF NS Display' 'SF Pro Text' 'SF Pro Display'; do
 		prefer "${family}" 'SF Pro'
 	done
