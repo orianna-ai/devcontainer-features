@@ -126,6 +126,19 @@ override() {
 EOF
 }
 
+reject_width() {
+	cat <<EOF
+  <selectfont>
+    <rejectfont>
+      <pattern>
+        <patelt name="family"><string>$1</string></patelt>
+        <patelt name="width"><int>$2</int></patelt>
+      </pattern>
+    </rejectfont>
+  </selectfont>
+EOF
+}
+
 rm -rf "${INSTALL_PATH}"
 mkdir -p "${INSTALL_PATH}"
 
@@ -143,7 +156,18 @@ mkdir -p "$(dirname "${CONFIG_PATH}")" "$(dirname "${CONFIG_LINK}")"
 	echo '<fontconfig>'
 	echo "  <dir>${INSTALL_PATH}</dir>"
 
-	for family in system-ui -apple-system BlinkMacSystemFont .AppleSystemUIFont \
+	# The variable SF Pro enumerates Compressed, Condensed and Expanded named
+	# instances alongside the normal-width ones, and fontconfig scores weight
+	# before width. Some width variants sit closer to a requested CSS weight
+	# than the normal face does -- Expanded Bold is weight 203 against Bold's
+	# 200 -- so font-weight: 800 lands on Expanded and headings render
+	# stretched. Drop them. Asking for a wdth axis value still works: that goes
+	# to the variable face, which is not one of these named instances.
+	for width in 47 60 132; do
+		reject_width 'SF Pro' "${width}"
+	done
+
+	for family in system-ui ui-sans-serif -apple-system BlinkMacSystemFont .AppleSystemUIFont \
 		'.SF NS' '.SF NS Text' '.SF NS Display' 'SF Pro Text' 'SF Pro Display'; do
 		prefer "${family}" 'SF Pro'
 	done
