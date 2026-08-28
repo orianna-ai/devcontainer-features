@@ -103,6 +103,11 @@ which is what actually makes `font-family: sans-serif` render as San Francisco. 
 page explicitly asking for Arial gets San Francisco too. That is the trade: there is no signal in
 what reaches fontconfig that distinguishes Chromium's generic from a page's deliberate `Arial`.
 
+Turning it off is not a promise that Arial avoids San Francisco, only that nothing here sends it
+there. On an image carrying no arial-metric font — the `ubuntu26.04` base is one — Arial matches
+nothing, falls through to the `sans-serif` generic, and lands on SF Pro anyway. Whether it does is
+a property of the base image's font set, not of this option.
+
 `monospace` needs no equivalent, because Chromium's default fixed font is `Monospace`, which
 fontconfig already treats as the generic.
 

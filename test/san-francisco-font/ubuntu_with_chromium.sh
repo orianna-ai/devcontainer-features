@@ -7,29 +7,38 @@ source \
 
 # Chromium does not ask fontconfig for the CSS generics, so only a real render proves these reach it.
 render_probe() {
-	local chrome page
+	local chrome work dom
 	chrome="$(find "${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/share/ms-playwright}" \
 		-path '*/chrome-linux/chrome' -print -quit)"
 	test -n "${chrome}" || return 1
 
-	page="$(mktemp --suffix=.html)"
-	cat >"${page}" <<'HTML'
-<!doctype html><meta charset=utf-8><body><pre id=out></pre><script>
+	work="$(mktemp -d)"
+
+	cat >"${work}/probe.js" <<'JS'
 const S = "Handgloves 0123 quick brown fox";
 const w = f => { const c = document.createElement("canvas").getContext("2d");
   c.font = "16px " + f; return c.measureText(S).width.toFixed(2); };
-const r = [
-  ["sans-serif", '"SF Pro"'], ["system-ui", '"SF Pro"'], ["-apple-system", '"SF Pro"'],
-  ["Arial", '"SF Pro"'], ["monospace", '"SF Mono"'], ["ui-monospace", '"SF Mono"'],
-].every(([asked, want]) => w(asked) === w(want));
-const distinct = w('"SF Pro"') !== w('"DejaVu Sans"') && w('"SF Mono"') !== w('"DejaVu Sans Mono"');
-// Assembled at run time: --dump-dom prints this script's source too, so a whole marker would match.
-document.getElementById("out").textContent = "verdict:" + ((r && distinct) ? "yes" : "no");
-</script></body>
+const want = { "SF Pro": w('"SF Pro"'), "SF Mono": w('"SF Mono"') };
+const probes = [["sans-serif", "SF Pro"], ["system-ui", "SF Pro"], ["-apple-system", "SF Pro"],
+  ["Arial", "SF Pro"], ["monospace", "SF Mono"], ["ui-monospace", "SF Mono"]];
+const ok = probes.every(([asked, target]) => w(asked) === want[target])
+  && want["SF Pro"] !== want["SF Mono"];
+document.getElementById("out").textContent =
+  probes.map(([asked, target]) =>
+    asked + "=" + w(asked) + (w(asked) === want[target] ? "==" : "!=") + target).join(" ") +
+  " | SF Pro=" + want["SF Pro"] + " SF Mono=" + want["SF Mono"] +
+  " | verdict:" + (ok ? "yes" : "no");
+JS
+
+	cat >"${work}/probe.html" <<'HTML'
+<!doctype html><meta charset=utf-8><pre id=out></pre><script src="probe.js"></script>
 HTML
 
-	"${chrome}" --headless --no-sandbox --disable-gpu --virtual-time-budget=5000 \
-		--dump-dom "file://${page}" 2>/dev/null | grep -q 'verdict:yes'
+	dom="$("${chrome}" --headless --no-sandbox --disable-gpu --virtual-time-budget=5000 \
+		--dump-dom "file://${work}/probe.html" 2>/dev/null)"
+
+	echo "${dom}" | sed -n 's/.*<pre id="out">\(.*\)<\/pre>.*/\1/p'
+	echo "${dom}" | grep -q 'verdict:yes'
 }
 
 check 'check if the fonts are installed' bash -c "test -f /usr/local/share/fonts/san-francisco/SF-Pro.ttf"
