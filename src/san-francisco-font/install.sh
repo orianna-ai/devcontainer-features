@@ -63,32 +63,33 @@ install_family() {
 	shift 2
 
 	local work="${staging}/${name}"
-	local package payload pattern font found
-	local includes=()
-
-	for pattern in "$@"; do
-		includes+=("-ir!${pattern}")
-	done
+	local layer fonts depth pattern font found
 
 	mkdir -p "${work}"
-	curl -fsSL "${url}" -o "${work}/font.dmg"
-	"${archiver}" x -y -bso0 -bsp0 "${work}/font.dmg" -o"${work}/image"
+	curl -fsSL "${url}" -o "${work}/download"
 
-	package="$(find "${work}/image" -name '*.pkg' -print -quit)"
-	if [ -z "${package}" ]; then
-		echo "no installer package inside ${url}; apple changed the download layout" >&2
+	layer="${work}/download"
+	fonts=""
+
+	for depth in 1 2 3 4 5; do
+		"${archiver}" x -y -bso0 -bsp0 "${layer}" -o"${work}/layer-${depth}"
+
+		if [ -n "$(find "${work}/layer-${depth}" -type f \( -name '*.otf' -o -name '*.ttf' \) -print -quit)" ]; then
+			fonts="${work}/layer-${depth}"
+			break
+		fi
+
+		layer="$(find "${work}/layer-${depth}" -type f \( -name '*.pkg' -o -name 'Payload*' \) -print -quit)"
+
+		if [ -z "${layer}" ]; then
+			break
+		fi
+	done
+
+	if [ -z "${fonts}" ]; then
+		echo "no fonts inside ${url}; apple changed the download layout" >&2
 		exit 1
 	fi
-
-	"${archiver}" x -y -bso0 -bsp0 "${package}" -o"${work}/package"
-
-	payload="$(find "${work}/package" -name 'Payload*' -print -quit)"
-	if [ -z "${payload}" ]; then
-		echo "no payload inside ${package}; apple changed the download layout" >&2
-		exit 1
-	fi
-
-	"${archiver}" x -y -bso0 -bsp0 "${payload}" -o"${work}/fonts" "${includes[@]}"
 
 	for pattern in "$@"; do
 		found=0
@@ -96,7 +97,7 @@ install_family() {
 		while IFS= read -r font; do
 			install -m 0644 "${font}" "${INSTALL_PATH}/"
 			found=1
-		done < <(find "${work}/fonts" -type f -name "${pattern}")
+		done < <(find "${fonts}" -type f -name "${pattern}")
 
 		if [ "${found}" -eq 0 ]; then
 			echo "no font matching ${pattern} in ${url}; apple changed the font set" >&2

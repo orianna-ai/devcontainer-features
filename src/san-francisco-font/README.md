@@ -43,10 +43,16 @@ the symlink turns the substitution off without uninstalling the fonts.
 ## What is downloaded
 
 Apple publishes each family as a disk image holding an installer package, whose payload is a
-gzipped cpio archive of the fonts. The feature unpacks all three layers with 7-Zip and keeps only
+gzipped cpio archive of the fonts. The feature unpacks its way down to the fonts and keeps only
 what it needs: `SF-Pro.ttf` and `SF-Pro-Italic.ttf`, plus the twelve SF Mono faces when `mono` is
-on. The payload is never expanded in full — the faces to keep are passed down as include filters,
-so SF Pro costs 40MB of scratch space rather than the 308MB the whole set unpacks to.
+on.
+
+How many layers that takes depends on the 7-Zip build, so it is not hardcoded. 7-Zip 23 unwraps the
+payload's gzip and cpio together while extracting the installer package, leaving three layers;
+7-Zip 26 — the version on Ubuntu 26.04 — stops at the gzip stream and needs a fourth pass. The
+feature extracts a layer at a time, stopping at the first that contains font files, so both behave
+the same. Nothing is filtered on the way down either: a filter that matches nothing at a layer
+extracts nothing and still succeeds, which is silent breakage the moment the nesting shifts.
 
 The two SF Pro files are the *variable* fonts, not the 44 static instances sitting beside them in
 the same download. One pair of files carries every weight from Ultralight to Black and every width
