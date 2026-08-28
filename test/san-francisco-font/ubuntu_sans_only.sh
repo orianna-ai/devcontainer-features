@@ -5,9 +5,9 @@ set -e
 source \
 	dev-container-features-test-lib
 
-FONTS_PATH=/usr/local/share/fonts/san-francisco
+INSTALL_PATH=/usr/local/share/fonts/san-francisco
 
-# See ubuntu.sh: an unescaped hyphen would be read as the start of fc-match's property list.
+# See ubuntu.sh: an unescaped hyphen starts fc-match's property list.
 resolves() {
 	local requested="$1" expected="$2"
 	test "$(fc-match --format '%{family[0]}' "${requested//-/\\-}")" = "${expected}"
@@ -21,11 +21,11 @@ not_san_francisco() {
 }
 
 mono_not_installed() {
-	! ls "${FONTS_PATH}"/SF-Mono-*.otf >/dev/null 2>&1 &&
+	! ls "${INSTALL_PATH}"/SF-Mono-*.otf >/dev/null 2>&1 &&
 		! fc-list --format '%{family[0]}\n' | grep -qx 'SF Mono'
 }
 
-check 'check if SF Pro is still installed' bash -c "test -f ${FONTS_PATH}/SF-Pro.ttf"
+check 'check if SF Pro is still installed' bash -c "test -f ${INSTALL_PATH}/SF-Pro.ttf"
 check 'check if SF Mono was skipped' mono_not_installed
 check 'check if sans-serif still resolves to SF Pro' resolves sans-serif 'SF Pro'
 check 'check if system-ui still resolves to SF Pro' resolves system-ui 'SF Pro'

@@ -5,10 +5,8 @@ set -e
 source \
 	dev-container-features-test-lib
 
-# What the feature is for: fontconfig agreeing is necessary but not sufficient, because Chromium
-# does not ask fontconfig for the CSS generics. It resolves sans-serif through its own default of
-# "Arial" and monospace through "Monospace", so only a real render proves the aliases reach it.
-# Widths are compared against the families by name -- equal width means the same font was picked.
+# Chromium does not ask fontconfig for the CSS generics, so only a real render proves the aliases
+# reach it. Equal text width against a family named outright means the same font was picked.
 render_probe() {
 	local chrome page
 	chrome="$(find "${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/share/ms-playwright}" \
@@ -25,11 +23,9 @@ const r = [
   ["sans-serif", '"SF Pro"'], ["system-ui", '"SF Pro"'], ["-apple-system", '"SF Pro"'],
   ["Arial", '"SF Pro"'], ["monospace", '"SF Mono"'], ["ui-monospace", '"SF Mono"'],
 ].every(([asked, want]) => w(asked) === w(want));
-// Guards the comparison itself: if SF Pro were missing, every name would fall back together and
-// each pair above would match on the fallback's width.
+// Without this every name could fall back together and each pair above would match on the fallback.
 const distinct = w('"SF Pro"') !== w('"DejaVu Sans"') && w('"SF Mono"') !== w('"DejaVu Sans Mono"');
-// Assembled at run time on purpose: --dump-dom prints this script's own source alongside the
-// DOM, so a marker written out whole here would be matched even when the check fails.
+// Assembled at run time: --dump-dom prints this script's source too, so a whole marker would match.
 document.getElementById("out").textContent = "verdict:" + ((r && distinct) ? "yes" : "no");
 </script></body>
 HTML

@@ -4,7 +4,7 @@
   "installsAfter": [
     "ghcr.io/devcontainers/features/common-utils"
   ],
-  "name": "San Francisco font",
+  "name": "San Francisco Font",
   "options": {
     "mono": {
       "default": true,

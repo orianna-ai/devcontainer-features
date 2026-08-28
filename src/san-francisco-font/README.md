@@ -1,4 +1,4 @@
-# San Francisco font (san-francisco-font)
+# San Francisco Font (san-francisco-font)
 
 Installs Apple's San Francisco fonts and makes them the system sans and monospace, so Chromium renders pages with them.
 
@@ -43,8 +43,10 @@ the symlink turns the substitution off without uninstalling the fonts.
 ## What is downloaded
 
 Apple publishes each family as a disk image holding an installer package, whose payload is a
-gzipped cpio archive of the fonts. The feature unpacks all three layers and keeps only what it
-needs: `SF-Pro.ttf` and `SF-Pro-Italic.ttf`, plus the twelve SF Mono faces when `mono` is on.
+gzipped cpio archive of the fonts. The feature unpacks all three layers with 7-Zip and keeps only
+what it needs: `SF-Pro.ttf` and `SF-Pro-Italic.ttf`, plus the twelve SF Mono faces when `mono` is
+on. The payload is never expanded in full — the faces to keep are passed down as include filters,
+so SF Pro costs 40MB of scratch space rather than the 308MB the whole set unpacks to.
 
 The two SF Pro files are the *variable* fonts, not the 44 static instances sitting beside them in
 the same download. One pair of files carries every weight from Ultralight to Black and every width
