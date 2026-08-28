@@ -1,0 +1,21 @@
+{
+  "description": "Installs Apple's San Francisco fonts and makes them the system sans and monospace, so Chromium renders pages with them.",
+  "id": "san-francisco-font",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "San Francisco Font",
+  "options": {
+    "mono": {
+      "default": true,
+      "description": "Install SF Mono and resolve monospace, ui-monospace, Menlo, SFMono-Regular and Courier New to it.",
+      "type": "boolean"
+    },
+    "webSafeSans": {
+      "default": true,
+      "description": "Also resolve Arial, Helvetica, Helvetica Neue, Segoe UI and Roboto to SF Pro. Required for the CSS sans-serif generic to be San Francisco in Chromium, which asks fontconfig for Arial rather than for sans-serif.",
+      "type": "boolean"
+    }
+  },
+  "version": "1.0.0"
+}

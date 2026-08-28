@@ -1,0 +1,30 @@
+{
+  "ubuntu": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "san-francisco-font": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  },
+  "ubuntu_sans_only": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "san-francisco-font": {
+        "mono": false,
+        "webSafeSans": false
+      }
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  },
+  "ubuntu_with_chromium": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "ghcr.io/orianna-ai/devcontainer-features/playwright:1": {},
+      "san-francisco-font": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  }
+}
