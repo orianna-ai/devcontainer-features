@@ -8,7 +8,7 @@
   "options": {
     "mono": {
       "default": true,
-      "description": "Install SF Mono and resolve monospace, ui-monospace, Menlo and SFMono-Regular to it.",
+      "description": "Install SF Mono and resolve monospace, ui-monospace, Menlo, SFMono-Regular and Courier New to it.",
       "type": "boolean"
     },
     "webSafeSans": {

@@ -160,6 +160,8 @@ mkdir -p "$(dirname "${CONFIG_PATH}")" "$(dirname "${CONFIG_LINK}")"
 		for family in monospace ui-monospace Menlo SFMono-Regular; do
 			prefer "${family}" 'SF Mono'
 		done
+
+		override 'Courier New' 'SF Mono'
 	fi
 
 	echo '</fontconfig>'

@@ -14,7 +14,7 @@ Installs Apple's San Francisco fonts and makes them the system sans and monospac
 
 | Options Id | Description | Type | Default Value |
 |-----|-----|-----|-----|
-| mono | Install SF Mono and resolve monospace, ui-monospace, Menlo and SFMono-Regular to it. | boolean | true |
+| mono | Install SF Mono and resolve monospace, ui-monospace, Menlo, SFMono-Regular and Courier New to it. | boolean | true |
 | webSafeSans | Also resolve Arial, Helvetica, Helvetica Neue, Segoe UI and Roboto to SF Pro. Required for the CSS sans-serif generic to be San Francisco in Chromium, which asks fontconfig for Arial rather than for sans-serif. | boolean | true |
 
 ## Requirements
@@ -108,8 +108,15 @@ there. On an image carrying no arial-metric font — the `ubuntu26.04` base is o
 nothing, falls through to the `sans-serif` generic, and lands on SF Pro anyway. Whether it does is
 a property of the base image's font set, not of this option.
 
-`monospace` needs no equivalent, because Chromium's default fixed font is `Monospace`, which
-fontconfig already treats as the generic.
+`monospace` needs the same treatment, but only under one of the two binaries. The full browser's
+default fixed font is `Monospace`, which fontconfig already treats as the generic — but the
+headless shell's is `Courier New`, so it renders `font-family: monospace` as whatever answers for
+Courier New. That is the binary Playwright launches for a headless run, so `mono` routes Courier
+New to SF Mono as well; without it, code blocks in a screenshot come out in Liberation Mono while
+everything around them is San Francisco.
+
+Both binaries are probed in the tests for that reason. They agree on every other family — the
+split is `monospace` alone.
 
 ## What is left alone
 
