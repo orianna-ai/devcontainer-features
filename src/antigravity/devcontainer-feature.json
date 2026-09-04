@@ -1,0 +1,9 @@
+{
+  "description": "Installs the Antigravity CLI from Google.",
+  "id": "antigravity",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "Antigravity CLI",
+  "version": "1.0.0"
+}
