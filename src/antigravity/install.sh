@@ -16,9 +16,6 @@ staged_bin="${staging}/bin"
 
 curl -fsSL "${INSTALLER_URL}" -o "${staging}/install.sh"
 
-# --dir places the binary; HOME is staged because the installer hands off to `agy install`, which
-# appends that directory to the shell profiles it finds in HOME, and because the download is
-# staged through $HOME/.cache/antigravity. Neither belongs in an image layer.
 env HOME="${staging}" bash "${staging}/install.sh" --dir "${staged_bin}"
 
 binary="${staged_bin}/agy"
