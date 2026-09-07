@@ -42,8 +42,10 @@ cache, among system Chrome installations, and in the Puppeteer and Playwright br
 last of which it locates through `PLAYWRIGHT_BROWSERS_PATH`.
 
 So pairing it with this repository's playwright feature is enough, and is what the orianna
-devcontainer does: that feature downloads Chromium and exports the variable, and agent-browser
-finds it with nothing configured.
+devcontainer does: that feature downloads a browser and exports the variable, and agent-browser
+finds it with nothing configured. Which build that is — playwright ships releases that call
+themselves "Chromium" and releases that call themselves "Google Chrome for Testing" — makes no
+difference to the discovery.
 
 ```json
 "features": {
@@ -55,7 +57,7 @@ finds it with nothing configured.
 Without it, `agent-browser doctor` reports no Chrome binary and `agent-browser install` downloads
 Chrome for Testing into the running container. That download is deliberately not done at build
 time. It would land in root's home, where the remote user cannot read it; it would duplicate a
-Chromium the image already has; and upstream publishes no Linux ARM64 build of Chrome for Testing,
+browser the image already has; and upstream publishes no Linux ARM64 build of Chrome for Testing,
 so on arm64 the playwright pairing is the only one of the two that works at all.
 
 ## Version pinning
