@@ -1,0 +1,31 @@
+{
+  "ubuntu": {
+    "features": {
+      "agent-browser": {
+        "version": "latest"
+      },
+      "ghcr.io/devcontainers/features/common-utils:2": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  },
+  "ubuntu_pinned": {
+    "features": {
+      "agent-browser": {
+        "version": "0.35.0"
+      },
+      "ghcr.io/devcontainers/features/common-utils:2": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  },
+  "ubuntu_with_chromium": {
+    "features": {
+      "agent-browser": {},
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "ghcr.io/orianna-ai/devcontainer-features/playwright:1": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  }
+}
