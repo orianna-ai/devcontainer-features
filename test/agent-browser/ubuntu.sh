@@ -16,16 +16,13 @@ resolves_inside_the_shared_prefix() {
 	esac
 }
 
-# The binary's own lookup expects the npm package layout, so the skills only resolve through the
-# variable -- and only if the copy behind it is readable by the remote user.
+# Guards the package layout the binary's own lookup expects, which the shared prefix breaks.
 serves_the_bundled_skills() {
 	test "${AGENT_BROWSER_SKILLS_DIR:-}" = "${INSTALL_PATH}/skill-data" &&
 		test "$(agent-browser skills path core)" = "${INSTALL_PATH}/skill-data/core" &&
 		agent-browser skills list | grep -q '^  core '
 }
 
-# Nothing about the CLI needs a node, so the scenario installs none and every check below runs
-# against an image that has none.
 no_node_on_path() {
 	! command -v node >/dev/null 2>&1 &&
 		! command -v npm >/dev/null 2>&1

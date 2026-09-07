@@ -5,9 +5,10 @@ set -e
 source \
 	dev-container-features-test-lib
 
-# The pairing this feature relies on for a browser: the playwright feature downloads a browser and
-# exports PLAYWRIGHT_BROWSERS_PATH, and agent-browser is expected to find it with nothing
-# configured. Only driving a real page proves that, so that is the first check.
+# The feature installs no browser and relies on agent-browser finding playwright's through
+# PLAYWRIGHT_BROWSERS_PATH, so only driving a real page proves the pairing. Which browser it picked
+# is asserted by path alone -- the version string is the browser's own, and playwright ships builds
+# calling themselves "Chromium" and builds calling themselves "Google Chrome for Testing".
 SESSION=featuretest
 
 drives_a_page() {
@@ -19,8 +20,6 @@ drives_a_page() {
 HTML
 
 	if ! agent-browser --session "${SESSION}" open "file://${work}/probe.html" >/dev/null; then
-		# Names the browser it looked for and where, which is the whole diagnosis when the
-		# pairing is what broke.
 		agent-browser doctor || true
 		return 1
 	fi
@@ -31,9 +30,6 @@ HTML
 		agent-browser --session "${SESSION}" close >/dev/null
 }
 
-# Which browser it picked, rather than merely that some browser worked. Only the path is asserted:
-# the version string is the browser's own, and playwright ships builds that call themselves
-# "Chromium" or "Google Chrome for Testing" depending on the release.
 resolves_inside_the_playwright_cache() {
 	local browsers report
 	browsers="${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/share/ms-playwright}"
