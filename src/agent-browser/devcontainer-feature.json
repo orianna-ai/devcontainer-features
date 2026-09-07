@@ -1,0 +1,19 @@
+{
+  "containerEnv": {
+    "AGENT_BROWSER_SKILLS_DIR": "/usr/local/share/agent-browser/skill-data"
+  },
+  "description": "Installs the agent-browser CLI, a browser automation CLI for AI agents, as a standalone binary with its bundled skills.",
+  "id": "agent-browser",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "agent-browser",
+  "options": {
+    "version": {
+      "default": "latest",
+      "description": "Version of the agent-browser package to install, as X.Y.Z, or latest for the newest published release.",
+      "type": "string"
+    }
+  },
+  "version": "1.0.0"
+}
