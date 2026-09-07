@@ -53,11 +53,13 @@ binary into a shared prefix breaks. `AGENT_BROWSER_SKILLS_DIR` is therefore set 
 `sudo` drops `containerEnv`, so `sudo agent-browser skills ...` would report no skills directory;
 run the CLI as the remote user.
 
-The package also ships a second, unrelated directory — `skills/agent-browser/SKILL.md`, an agent
-skill in the frontmatter format Claude Code, Codex, Grok and Antigravity all read — and it is
-installed alongside at `/usr/local/share/agent-browser/skills`. It is a discovery stub rather than
-a manual: it tells an agent to run `agent-browser skills get core` before anything else, which is
-what keeps the guidance matched to the installed binary.
+The package also ships one unrelated file — `skills/agent-browser/SKILL.md`, an agent skill in the
+frontmatter format Claude Code, Codex, Grok and Antigravity all read — and it is installed
+alongside at `/usr/local/share/agent-browser/skills`. That single file is the whole of upstream's
+`skills/` tree, against 26 under `skill-data/`, because it is a discovery stub rather than a
+manual: it tells an agent to run `agent-browser skills get core` before anything else, so the
+guidance it hands over comes from the installed binary and stays matched to it. Being a pointer is
+also what makes it stable enough to copy — there is nothing in it for a release to invalidate.
 
 Nothing reads that copy automatically. It is there for whatever assembles agent plugin bundles to
 copy out of, so a bundle carries upstream's stub byte for byte instead of a hand-written
