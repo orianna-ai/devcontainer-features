@@ -43,7 +43,7 @@ curl -fsSL "${tarball_url}" -o "${staging}/package.tgz"
 
 binary_member="package/bin/agent-browser-linux-${arch}"
 
-tar -xzf "${staging}/package.tgz" -C "${staging}" "${binary_member}" package/skill-data
+tar -xzf "${staging}/package.tgz" -C "${staging}" "${binary_member}" package/skill-data package/skills
 
 if [ ! -s "${staging}/${binary_member}" ]; then
 	echo "agent-browser@${VERSION} ships no ${binary_member}" >&2
@@ -55,9 +55,15 @@ if [ ! -f "${staging}/package/skill-data/core/SKILL.md" ]; then
 	exit 1
 fi
 
+if [ ! -f "${staging}/package/skills/agent-browser/SKILL.md" ]; then
+	echo "agent-browser@${VERSION} ships no skills/agent-browser/SKILL.md" >&2
+	exit 1
+fi
+
 rm -rf "${INSTALL_PATH}"
 install -D -m 0755 "${staging}/${binary_member}" "${INSTALL_PATH}/bin/agent-browser"
 cp -R "${staging}/package/skill-data" "${INSTALL_PATH}/skill-data"
+cp -R "${staging}/package/skills" "${INSTALL_PATH}/skills"
 
 ln -sfn "${INSTALL_PATH}/bin/agent-browser" /usr/local/bin/agent-browser
 

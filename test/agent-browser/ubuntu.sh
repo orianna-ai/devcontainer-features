@@ -23,6 +23,12 @@ serves_the_bundled_skills() {
 		agent-browser skills list | grep -q '^  core '
 }
 
+# The stub agent plugin bundles copy out of, which nothing reads on its own.
+ships_the_agent_skill() {
+	test -r "${INSTALL_PATH}/skills/agent-browser/SKILL.md" &&
+		grep -q '^name: agent-browser$' "${INSTALL_PATH}/skills/agent-browser/SKILL.md"
+}
+
 no_node_on_path() {
 	! command -v node >/dev/null 2>&1 &&
 		! command -v npm >/dev/null 2>&1
@@ -31,7 +37,8 @@ no_node_on_path() {
 not_writable_by_remote_user() {
 	! test -w /usr/local/bin/agent-browser &&
 		! test -w "${INSTALL_PATH}/bin/agent-browser" &&
-		! test -w "${INSTALL_PATH}/skill-data/core/SKILL.md"
+		! test -w "${INSTALL_PATH}/skill-data/core/SKILL.md" &&
+		! test -w "${INSTALL_PATH}/skills/agent-browser/SKILL.md"
 }
 
 check 'check the image has no node of its own' no_node_on_path
@@ -39,5 +46,6 @@ check 'check if agent-browser exists' bash -c "command -v agent-browser"
 check 'check if agent-browser runs' bash -c "agent-browser --version"
 check 'check if agent-browser resolves inside the shared prefix' resolves_inside_the_shared_prefix
 check 'check if agent-browser serves the bundled skills' serves_the_bundled_skills
+check 'check if agent-browser ships the agent skill' ships_the_agent_skill
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
 reportResults

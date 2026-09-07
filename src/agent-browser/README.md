@@ -53,6 +53,17 @@ binary into a shared prefix breaks. `AGENT_BROWSER_SKILLS_DIR` is therefore set 
 `sudo` drops `containerEnv`, so `sudo agent-browser skills ...` would report no skills directory;
 run the CLI as the remote user.
 
+The package also ships a second, unrelated directory — `skills/agent-browser/SKILL.md`, an agent
+skill in the frontmatter format Claude Code, Codex, Grok and Antigravity all read — and it is
+installed alongside at `/usr/local/share/agent-browser/skills`. It is a discovery stub rather than
+a manual: it tells an agent to run `agent-browser skills get core` before anything else, which is
+what keeps the guidance matched to the installed binary.
+
+Nothing reads that copy automatically. It is there for whatever assembles agent plugin bundles to
+copy out of, so a bundle carries upstream's stub byte for byte instead of a hand-written
+paraphrase that drifts. `agent-browser` has no `install --skills` subcommand to generate one, which
+is why the image carries it.
+
 ## The browser
 
 This feature installs the CLI, not a browser. agent-browser looks for one at run time in its own
