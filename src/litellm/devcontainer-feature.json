@@ -1,0 +1,21 @@
+{
+  "description": "Installs the LiteLLM proxy on a private Python runtime, independent of any Python in the image.",
+  "id": "litellm",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "LiteLLM proxy",
+  "options": {
+    "pythonVersion": {
+      "default": "3.13",
+      "description": "Version of the private Python runtime that runs the proxy, as X.Y or X.Y.Z.",
+      "type": "string"
+    },
+    "version": {
+      "default": "latest",
+      "description": "Version of the litellm package to install, as X.Y.Z, or latest for the newest release on PyPI.",
+      "type": "string"
+    }
+  },
+  "version": "1.0.0"
+}
