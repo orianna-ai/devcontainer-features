@@ -6,6 +6,8 @@ source \
 	dev-container-features-test-lib
 
 INSTALL_PATH=/usr/local/share/litellm
+# Matches the feature's default; bump both together when the reviewed release moves.
+DEFAULT_VERSION=1.101.0
 
 # Guards uv's own layout, which leaves the interpreter and launcher in a home directory.
 resolves_inside_the_shared_prefix() {
@@ -29,6 +31,10 @@ leaves_nothing_in_the_home_directory() {
 	test ! -e "${HOME}/.local/bin/litellm" &&
 		test ! -e "${HOME}/.local/share/uv" &&
 		test ! -e "${HOME}/.cache/uv"
+}
+
+installs_the_reviewed_default_version() {
+	litellm --version | grep -qF "${DEFAULT_VERSION}"
 }
 
 not_writable_by_remote_user() {
@@ -71,6 +77,7 @@ check 'check if litellm exists' bash -c "command -v litellm"
 check 'check if litellm runs' bash -c "litellm --version"
 check 'check if litellm resolves inside the shared prefix' resolves_inside_the_shared_prefix
 check 'check if litellm runs on the private interpreter' runs_on_the_private_interpreter
+check 'check if litellm installed the reviewed default version' installs_the_reviewed_default_version
 check 'check if the installer left nothing in the home directory' leaves_nothing_in_the_home_directory
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
 check 'check if litellm serves its liveliness probe' serves_its_liveliness_probe

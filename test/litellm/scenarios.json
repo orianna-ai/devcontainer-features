@@ -2,6 +2,14 @@
   "ubuntu": {
     "features": {
       "ghcr.io/devcontainers/features/common-utils:2": {},
+      "litellm": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  },
+  "ubuntu_latest": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
       "litellm": {
         "version": "latest"
       }
@@ -9,11 +17,11 @@
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
     "user": "vscode"
   },
-  "ubuntu_pinned": {
+  "ubuntu_python": {
     "features": {
       "ghcr.io/devcontainers/features/common-utils:2": {},
       "litellm": {
-        "version": "1.101.0"
+        "pythonVersion": "3.12"
       }
     },
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",

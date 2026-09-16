@@ -1,10 +1,12 @@
 ## Requirements
 
-None beyond a Debian or Ubuntu base image with `curl`. The proxy is a Python package, but it
-does not use the image's Python: `uv` is fetched into a staging directory, installs a private
-interpreter and the package into the shared prefix, and leaves with the staging directory. The
-image's own Python, if any, is neither read nor written. It is a large install (a little under
-700 MB with the interpreter), which lands as one layer in whatever image installs it.
+A Debian or Ubuntu base image with `curl`, `unzip` and `sha256sum`, all of which `common-utils`
+provides. The proxy is a Python package, but it does not use the image's Python: a pinned `uv`
+release is fetched from PyPI into a staging directory and verified against the digest PyPI
+publishes for it, installs a private interpreter and the package into the shared prefix, and
+leaves with the staging directory. The image's own Python, if any, is neither read nor written.
+It is a large install (a little under 700 MB with the interpreter), which lands as one layer in
+whatever image installs it.
 
 ```json
 "features": {
@@ -41,14 +43,16 @@ image layer. At run time the proxy reads whatever keys its configuration names.
 
 ## Version pinning
 
-`version` accepts an exact `X.Y.Z`, which freezes the package into the image digest. The default,
-`latest`, resolves the newest release on PyPI at *image build* time — so it is still fixed for the
-life of the image, and moves only when the image is rebuilt. That is the point of installing it
-here rather than at container start: every container from a given image runs a known version.
+`version` defaults to a reviewed release rather than to `latest`, and takes an exact `X.Y.Z`,
+which freezes the package into the image digest. In March 2026 two litellm releases (1.82.7 and
+1.82.8) were briefly replaced on PyPI by a credential stealer; a pinned, known-good default is
+what keeps an ordinary image rebuild from picking up the next such release on its own. `latest`
+is accepted as an explicit opt-in and resolves the newest release on PyPI at *image build* time —
+still fixed for the life of the image, but moving on every rebuild.
 
-Pin it. In March 2026 two litellm releases (1.82.7 and 1.82.8) were briefly replaced on PyPI by a
-credential stealer; a pinned, known-good version is what keeps a rebuild from picking up the next
-such release on its own.
+`uv` itself is pinned the same way: a fixed version, fetched as the wheel PyPI publishes for the
+image's architecture and checked against that wheel's digest before it runs. Bumping it means
+updating the version and both digests in `install.sh` together.
 
 `pythonVersion` picks the private interpreter. The package requires Python below 3.15; the
 default stays on a release its wheels are well exercised on rather than the newest.
