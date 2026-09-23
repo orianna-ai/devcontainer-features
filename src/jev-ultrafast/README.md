@@ -52,9 +52,7 @@ Progress goes to stderr, one line per decision. When the run stops, one JSON obj
 and the `actions` taken. The exit code is 0 only for `done`. A `done` is Jev's own verdict, so read
 the final page before relying on it.
 
-`--jsonl` streams the run instead: each decision is written to stdout as one
-`{"event": "step", ...}` line, and the result follows as `{"event": "result", ...}`. SIGTERM stops
-the run and the browser it launched.
+SIGTERM stops the run and the browser it launched.
 
 ## The browser
 

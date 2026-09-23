@@ -24,21 +24,10 @@ HTML
 		echo "${report}" | grep -q 'HTTP 401'
 }
 
-streams_the_result_as_json_lines() {
-	local work
-	work="$(mktemp -d)"
-
-	echo '<!doctype html><title>probe</title><button>Go</button>' >"${work}/probe.html"
-
-	TYPESAFE_API_KEY=invalid jev-ultrafast --jsonl --url "file://${work}/probe.html" --goal 'Click Go' |
-		tail -n 1 | grep -q '^{"event": "result", "status": "blocked"'
-}
-
 leaves_no_browser_behind() {
 	! pgrep -u "$(id -u)" -f -- '--user-data-dir=.*jev-ultrafast-' >/dev/null
 }
 
 check 'check if jev-ultrafast drives chromium up to the model call' observes_a_page_up_to_the_model_call
-check 'check if jev-ultrafast streams the result as json lines' streams_the_result_as_json_lines
 check 'check if jev-ultrafast stops the browser it launched' leaves_no_browser_behind
 reportResults
