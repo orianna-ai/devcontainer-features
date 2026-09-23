@@ -3,6 +3,8 @@
 Jev Ultrafast ships a library and a local inspector, not a goal-to-result command, so this is the
 command: it takes a start URL and a goal, drives a browser until TypeSafe's Jev chooses DONE or
 BLOCKED, and writes one JSON object to stdout. Progress goes to stderr, one line per decision.
+With --jsonl, progress goes to stdout instead as one {"event": "step", ...} object per decision,
+followed by the result as {"event": "result", ...}, so a caller can stream the run.
 
 The browser is a fresh headless Chromium with a throwaway profile, unless BU_CDP_URL or BU_CDP_WS
 names one to attach to instead. Browser Harness state lives in a temporary directory, so
@@ -130,7 +132,12 @@ def main() -> int:
     )
     parser.add_argument("--max-text", type=int, default=4000, help="Characters of final page text to print.")
     parser.add_argument("--startup-timeout", type=float, default=30, help="Seconds to wait for Chromium.")
+    parser.add_argument("--jsonl", action="store_true", help="Stream steps and the result as JSON lines.")
     args = parser.parse_args()
+
+    # A caller that gives up sends SIGTERM; exit through the finally blocks so the browser this run
+    # launched, which lives in its own session, is stopped too.
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(128 + signal.SIGTERM))
 
     if not os.environ.get("TYPESAFE_API_KEY"):
         raise SystemExit("jev-ultrafast: TYPESAFE_API_KEY is not set")
@@ -154,11 +161,21 @@ def main() -> int:
                 try:
                     for state in agent.run():
                         last = state["history"][-1] if state["history"] else {}
-                        print(
-                            f"{state['elapsed_ms']:>6} ms  {state['status']:<8} {last.get('action', '')}",
-                            file=sys.stderr,
-                            flush=True,
-                        )
+                        if args.jsonl:
+                            step = {
+                                "event": "step",
+                                "status": state["status"],
+                                "elapsed_ms": state["elapsed_ms"],
+                                "url": state["page"].get("url"),
+                                "action": _action(last) if last else None,
+                            }
+                            print(json.dumps(step, ensure_ascii=False), flush=True)
+                        else:
+                            print(
+                                f"{state['elapsed_ms']:>6} ms  {state['status']:<8} {last.get('action', '')}",
+                                file=sys.stderr,
+                                flush=True,
+                            )
                 except (RuntimeError, ValueError) as e:
                     # Budgets, provider failures and an unsettled page end a run by raising; report
                     # what was done up to that point rather than a traceback.
@@ -183,7 +200,7 @@ def main() -> int:
             _stop(browser)
         shutil.rmtree(work, ignore_errors=True)
 
-    print(json.dumps(result, ensure_ascii=False))
+    print(json.dumps({"event": "result", **result} if args.jsonl else result, ensure_ascii=False))
     return 0 if result["status"] == "done" else 2
 
 
