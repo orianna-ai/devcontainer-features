@@ -1,0 +1,19 @@
+{
+  "ubuntu": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "jev-ultrafast": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  },
+  "ubuntu_with_chromium": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "ghcr.io/orianna-ai/devcontainer-features/playwright:1": {},
+      "jev-ultrafast": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  }
+}

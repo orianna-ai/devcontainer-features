@@ -1,0 +1,22 @@
+{
+  "description": "Installs Jev Ultrafast, Browser Use's TypeSafe-driven browser agent, behind a jev-ultrafast CLI that runs one goal and prints the outcome as JSON.",
+  "id": "jev-ultrafast",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils",
+    "ghcr.io/orianna-ai/devcontainer-features/playwright"
+  ],
+  "name": "Jev Ultrafast",
+  "options": {
+    "pythonVersion": {
+      "default": "3.13",
+      "description": "Python version for the private interpreter the agent runs under.",
+      "type": "string"
+    },
+    "version": {
+      "default": "1231850a0bf1a0c0341fe408ef1668dbbfdfac46",
+      "description": "Git ref of github.com/browser-use/jev-ultrafast to install. The project publishes no releases, so the default is a pinned commit.",
+      "type": "string"
+    }
+  },
+  "version": "1.0.0"
+}
