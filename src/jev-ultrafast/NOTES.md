@@ -40,6 +40,10 @@ the browser in the Playwright cache (`PLAYWRIGHT_BROWSERS_PATH`), then on `PATH`
 `JEV_ULTRAFAST_CHROME` overrides both. If `BU_CDP_URL` or `BU_CDP_WS` is set, the run attaches to
 that browser instead and launches nothing.
 
+Chromium keeps its sandbox wherever it can. As root, or in a container without user namespaces
+(where a sandboxed launch exits at once), it relaunches with `--no-sandbox` and prints a warning
+to stderr. `JEV_ULTRAFAST_NO_SANDBOX=1` skips the sandboxed attempt.
+
 Browser Harness keeps its daemon state in a per-run temporary directory, and its telemetry is off
 unless `BH_TELEMETRY` says otherwise. Concurrent runs therefore never share a daemon or a browser.
 
@@ -49,7 +53,8 @@ Upstream publishes no releases or PyPI package, so `version` is a git ref and de
 commit. The package goes into a virtualenv at `/usr/local/share/jev-ultrafast/venv`. Its private
 uv-managed interpreter sits beside it and does not depend on the image's Python. The command is
 symlinked to `/usr/local/bin/jev-ultrafast`. Everything is root-owned and read-only to other users.
-The uv that builds the install is discarded afterwards.
+The uv that builds the install comes from a release archive checked against a pinned SHA-256, and is
+discarded afterwards.
 
 ## Authentication
 

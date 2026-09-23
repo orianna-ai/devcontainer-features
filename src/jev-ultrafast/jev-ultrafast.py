@@ -42,7 +42,28 @@ def _chrome() -> str:
 
 
 def _launch(profile: Path, timeout: float) -> tuple[subprocess.Popen, str]:
-    """Start headless Chromium on an ephemeral debugging port and return its HTTP endpoint."""
+    """Start headless Chromium on an ephemeral debugging port and return its HTTP endpoint.
+
+    Chromium's sandbox is kept whenever the environment supports it. Root always needs
+    ``--no-sandbox``, and so does a container without user namespaces, where a sandboxed launch
+    exits at once. In those cases the launch retries unsandboxed and says so on stderr.
+    ``JEV_ULTRAFAST_NO_SANDBOX=1`` skips the sandboxed attempt.
+    """
+    if os.geteuid() == 0 or os.environ.get("JEV_ULTRAFAST_NO_SANDBOX") == "1":
+        return _start(profile, timeout, sandbox=False)
+    try:
+        return _start(profile, timeout, sandbox=True)
+    except _SandboxUnavailable:
+        print("jev-ultrafast: chromium's sandbox is unavailable here; running without it", file=sys.stderr)
+        shutil.rmtree(profile, ignore_errors=True)
+        return _start(profile, timeout, sandbox=False)
+
+
+class _SandboxUnavailable(Exception):
+    pass
+
+
+def _start(profile: Path, timeout: float, *, sandbox: bool) -> tuple[subprocess.Popen, str]:
     process = subprocess.Popen(
         [
             _chrome(),
@@ -54,8 +75,7 @@ def _launch(profile: Path, timeout: float) -> tuple[subprocess.Popen, str]:
             "--no-default-browser-check",
             "--disable-dev-shm-usage",
             "--window-size=1120,780",
-            # Containers rarely allow Chrome's user-namespace sandbox; Playwright disables it too.
-            "--no-sandbox",
+            *([] if sandbox else ["--no-sandbox"]),
             "about:blank",
         ],
         stdin=subprocess.DEVNULL,
@@ -65,16 +85,23 @@ def _launch(profile: Path, timeout: float) -> tuple[subprocess.Popen, str]:
     )
     port_file = profile / "DevToolsActivePort"
     deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
-        if process.poll() is not None:
-            raise SystemExit(f"jev-ultrafast: chromium exited with {process.returncode} before it was ready")
-        if port_file.exists():
-            port = port_file.read_text().split("\n", 1)[0].strip()
-            if port:
-                return process, f"http://127.0.0.1:{port}"
-        time.sleep(0.05)
-    _stop(process)
-    raise SystemExit("jev-ultrafast: chromium did not open a debugging port in time")
+    try:
+        while time.monotonic() < deadline:
+            if process.poll() is not None:
+                if sandbox:
+                    raise _SandboxUnavailable()
+                raise SystemExit(f"jev-ultrafast: chromium exited with {process.returncode} before it was ready")
+            if port_file.exists():
+                port = port_file.read_text().split("\n", 1)[0].strip()
+                if port:
+                    return process, f"http://127.0.0.1:{port}"
+            time.sleep(0.05)
+        raise SystemExit("jev-ultrafast: chromium did not open a debugging port in time")
+    except BaseException:
+        # The caller only owns the browser once this returns, so every other exit stops it here,
+        # including the children of a leader that has already died.
+        _stop(process)
+        raise
 
 
 def _stop(process: subprocess.Popen) -> None:
