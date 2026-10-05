@@ -29,7 +29,7 @@ check 'check the image has no node of its own' no_node_on_path
 check 'check if playwright-cli exists' bash -c "command -v playwright-cli"
 check 'check if playwright-cli runs' bash -c "playwright-cli --version"
 check 'check if the private runtime was installed' runtime_installed
-check 'check if chromium was downloaded' bash -c "ls /usr/local/share/ms-playwright | grep -q chromium"
+check 'check if the full chromium was downloaded' bash -c "test -x /usr/local/share/ms-playwright/chromium-*/chrome-linux*/chrome"
 check 'check if the browser opens with no --browser flag' bash -c "PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli open && PLAYWRIGHT_CLI_SESSION=featuretest playwright-cli close"
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user
 reportResults
