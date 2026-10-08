@@ -7,7 +7,7 @@ source \
 
 INSTALL_PATH=/usr/local/share/antigravity
 
-# Guards the installer's own layout, which leaves the binary in a home directory.
+# Guards against the binary landing anywhere but the shared, root-owned prefix.
 resolves_inside_the_shared_prefix() {
 	resolved="$(readlink -f "$(command -v agy)")" || return 1
 	test -x "${resolved}" || return 1
@@ -23,8 +23,8 @@ runs_without_credentials() {
 		agy --version
 }
 
-# The installer's default target is $HOME/.local/bin and it stages its download through
-# $HOME/.cache/antigravity. Staging HOME during the build is what keeps both out of the image.
+# Upstream's install.sh defaults to $HOME/.local/bin and stages through $HOME/.cache/antigravity;
+# the feature bypasses it, so neither may appear.
 leaves_nothing_in_the_home_directory() {
 	test ! -e "${HOME}/.local/bin/agy" &&
 		test ! -e "${HOME}/.cache/antigravity"

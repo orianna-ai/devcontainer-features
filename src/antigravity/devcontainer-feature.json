@@ -5,5 +5,5 @@
     "ghcr.io/devcontainers/features/common-utils"
   ],
   "name": "Antigravity CLI",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
