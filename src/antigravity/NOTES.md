@@ -17,21 +17,21 @@ The binary is copied to `/usr/local/share/antigravity/bin/agy` and symlinked to
 `/usr/local/bin/agy`, the same shared-prefix shape the other features use: one root-owned copy,
 readable and executable by every user, writable by none of them.
 
-Upstream's installer is run to fetch the binary rather than reimplementing its platform detection
-and checksum verification, but it is not left to place the result. Its default target is
-`$HOME/.local/bin`, so an install run as root during a build puts the binary under `/root` —
-reachable while building, unreadable to the remote user afterwards. `--dir` moves the binary, but
-two things still follow `HOME`: the download is staged through `$HOME/.cache/antigravity`, and the
-installer's last step hands off to `agy install`, which appends the install directory to the shell
-profiles it finds in `$HOME`. The feature stages a `HOME`, lets both of those land inside it,
-copies the binary into the shared prefix, and deletes the staging directory. The symlink is what
-puts the CLI on `PATH`, so nothing has to be added to a profile.
+The feature does not run upstream's `install.sh`. It reads the same per-platform release manifest
+that script reads (`manifests/linux_<arch>.json`, with `<arch>` `amd64` or `arm64` from
+`uname -m`), downloads the archive the manifest names, checks it against the manifest's sha512, and
+extracts the binary straight into the shared prefix. Fetching and executing the installer script
+broke arm64 image builds under emulation — bash rejected the downloaded file as binary — and the
+script's other side effects (staging through `$HOME/.cache/antigravity`, defaulting to
+`$HOME/.local/bin`, and handing off to `agy install` to edit shell profiles) are all things a
+shared, root-owned install has to undo anyway. The symlink is what puts the CLI on `PATH`, so
+nothing has to be added to a profile.
 
 ## Authentication
 
-Nothing is authenticated at build time. The installer's only network calls are to the public
-release manifest and the release archive it names; it reads no credential from the environment it
-inherits, so none can be baked into an image layer.
+Nothing is authenticated at build time. The only network calls are to the public release manifest
+and the release archive it names; no credential is read from the environment, so none can be baked
+into an image layer.
 
 At run time the CLI takes either a cached interactive login or an API key. The key path is the one
 a headless container wants: `modelProvider` set to `gemini` in
@@ -40,9 +40,8 @@ whatever drives the CLI, not here.
 
 ## Version pinning
 
-Upstream's installer takes no version argument — it always resolves the newest build from its
-release manifest — so unlike the grok feature there is no `version` option to expose. The version
-is nonetheless fixed for the life of the image: it resolves at *image build* time and moves only
+The release manifest only names the newest build — upstream publishes no per-version manifest — so
+unlike the grok feature there is no `version` option to expose. The version is nonetheless fixed for the life of the image: it resolves at *image build* time and moves only
 when the image is rebuilt. That is the point of installing it here rather than at container start.
 
 The CLI also self-updates in the background during normal runs, which would undo that. Installing
