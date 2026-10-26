@@ -1,0 +1,22 @@
+{
+  "ubuntu": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "orchard": {
+        "version": "latest"
+      }
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  },
+  "ubuntu_pinned": {
+    "features": {
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "orchard": {
+        "version": "0.55.0"
+      }
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "description": "Installs the Orchard CLI from Cirrus Labs.",
+  "id": "orchard",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "Orchard CLI",
+  "options": {
+    "version": {
+      "default": "latest",
+      "description": "Version of the orchard CLI to install, as X.Y.Z, or latest for the newest release.",
+      "type": "string"
+    }
+  },
+  "version": "1.0.0"
+}
