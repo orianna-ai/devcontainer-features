@@ -21,7 +21,7 @@ esac
 
 if [ "${VERSION}" = "latest" ]; then
 	url="${RELEASES_URL}/latest/download/orchard-linux-${arch}.tar.gz"
-elif [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+elif [[ ${VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 	url="${RELEASES_URL}/download/${VERSION}/orchard-linux-${arch}.tar.gz"
 else
 	echo "version must be X.Y.Z or latest, not ${VERSION}" >&2
