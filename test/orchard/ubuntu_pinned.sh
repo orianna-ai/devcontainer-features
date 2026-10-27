@@ -5,8 +5,7 @@ set -e
 source \
 	dev-container-features-test-lib
 
-# Matches scenarios.json and the controller in orianna's third_party/orchard; bump them together.
-PINNED_VERSION=0.55.0
+PINNED_VERSION=0.58.0
 
 installs_the_pinned_version() {
 	orchard --version | grep -qF "version ${PINNED_VERSION}"
