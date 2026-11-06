@@ -37,8 +37,17 @@ stays unsupported; run the CLI as the remote user.
 
 ## Browsers
 
-Chromium only, plus the headless shell and ffmpeg that come with it. Firefox and WebKit are not
-downloaded.
+Chromium by default, plus the headless shell and ffmpeg that come with it. `browsers` takes a
+comma-separated list to install others alongside it, each with its system libraries. Chromium stays
+installed whatever the list says, because `PLAYWRIGHT_MCP_BROWSER` points `playwright-cli` at it:
+
+```json
+"features": {
+    "ghcr.io/orianna-ai/devcontainer-features/playwright:1": {
+        "browsers": "chromium,webkit"
+    }
+}
+```
 
 They live in `/usr/local/share/ms-playwright` rather than Playwright's default `$HOME/.cache`, and
 `PLAYWRIGHT_BROWSERS_PATH` is set through `containerEnv` to match. Nothing to configure, and it
