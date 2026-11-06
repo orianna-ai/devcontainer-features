@@ -3,6 +3,7 @@ set -euo pipefail
 
 VERSION="${VERSION:-latest}"
 NODE_VERSION="${NODEVERSION:-24.18.0}"
+BROWSERS="${BROWSERS:-chromium}"
 BROWSERS_PATH="/usr/local/share/ms-playwright"
 INSTALL_PATH="/usr/local/share/playwright-cli"
 RUNTIME="/usr/local/share/node-runtime/v${NODE_VERSION}"
@@ -74,8 +75,10 @@ fi
 
 apt-get update -y
 
-"${NODE}" "${playwright_core}" install-deps chromium
-"${NODE}" "${playwright_core}" install chromium
+read -ra browsers <<<"${BROWSERS//,/ }"
+
+"${NODE}" "${playwright_core}" install-deps "${browsers[@]}"
+"${NODE}" "${playwright_core}" install "${browsers[@]}"
 
 rm -rf /var/lib/apt/lists/*
 

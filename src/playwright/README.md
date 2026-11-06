@@ -15,6 +15,7 @@ Installs the Playwright CLI and Chromium on a private node runtime, independent 
 
 | Options Id | Description | Type | Default Value |
 |-----|-----|-----|-----|
+| browsers | Comma-separated Playwright browsers to install with their system libraries, from chromium, firefox and webkit. | string | chromium |
 | nodeVersion | Version of the private node runtime that runs the CLI, as X.Y.Z. Features pinning the same version share one runtime copy. | string | 24.18.0 |
 | version | Version of the @playwright/cli package to install. | string | latest |
 
@@ -57,8 +58,16 @@ stays unsupported; run the CLI as the remote user.
 
 ## Browsers
 
-Chromium only, plus the headless shell and ffmpeg that come with it. Firefox and WebKit are not
-downloaded.
+Chromium by default, plus the headless shell and ffmpeg that come with it. `browsers` takes a
+comma-separated list to install others alongside it, each with its system libraries:
+
+```json
+"features": {
+    "ghcr.io/orianna-ai/devcontainer-features/playwright:1": {
+        "browsers": "chromium,webkit"
+    }
+}
+```
 
 They live in `/usr/local/share/ms-playwright` rather than Playwright's default `$HOME/.cache`, and
 `PLAYWRIGHT_BROWSERS_PATH` is set through `containerEnv` to match. Nothing to configure, and it
