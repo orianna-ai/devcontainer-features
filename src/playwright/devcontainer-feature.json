@@ -12,7 +12,7 @@
   "options": {
     "browsers": {
       "default": "chromium",
-      "description": "Comma-separated Playwright browsers to install with their system libraries, from chromium, firefox and webkit.",
+      "description": "Comma-separated Playwright browsers to install with their system libraries, from chromium, firefox and webkit. Chromium is always installed, since playwright-cli opens it by default.",
       "type": "string"
     },
     "nodeVersion": {

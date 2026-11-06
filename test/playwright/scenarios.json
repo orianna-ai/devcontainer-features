@@ -24,7 +24,7 @@
     "features": {
       "ghcr.io/devcontainers/features/common-utils:2": {},
       "playwright": {
-        "browsers": "chromium,webkit",
+        "browsers": "webkit",
         "version": "latest"
       }
     },

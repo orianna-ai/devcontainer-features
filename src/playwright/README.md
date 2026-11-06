@@ -15,7 +15,7 @@ Installs the Playwright CLI and Chromium on a private node runtime, independent 
 
 | Options Id | Description | Type | Default Value |
 |-----|-----|-----|-----|
-| browsers | Comma-separated Playwright browsers to install with their system libraries, from chromium, firefox and webkit. | string | chromium |
+| browsers | Comma-separated Playwright browsers to install with their system libraries, from chromium, firefox and webkit. Chromium is always installed, since playwright-cli opens it by default. | string | chromium |
 | nodeVersion | Version of the private node runtime that runs the CLI, as X.Y.Z. Features pinning the same version share one runtime copy. | string | 24.18.0 |
 | version | Version of the @playwright/cli package to install. | string | latest |
 
@@ -59,7 +59,8 @@ stays unsupported; run the CLI as the remote user.
 ## Browsers
 
 Chromium by default, plus the headless shell and ffmpeg that come with it. `browsers` takes a
-comma-separated list to install others alongside it, each with its system libraries:
+comma-separated list to install others alongside it, each with its system libraries. Chromium stays
+installed whatever the list says, because `PLAYWRIGHT_MCP_BROWSER` points `playwright-cli` at it:
 
 ```json
 "features": {

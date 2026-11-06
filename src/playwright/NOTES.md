@@ -38,7 +38,8 @@ stays unsupported; run the CLI as the remote user.
 ## Browsers
 
 Chromium by default, plus the headless shell and ffmpeg that come with it. `browsers` takes a
-comma-separated list to install others alongside it, each with its system libraries:
+comma-separated list to install others alongside it, each with its system libraries. Chromium stays
+installed whatever the list says, because `PLAYWRIGHT_MCP_BROWSER` points `playwright-cli` at it:
 
 ```json
 "features": {

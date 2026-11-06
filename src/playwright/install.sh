@@ -75,7 +75,12 @@ fi
 
 apt-get update -y
 
-read -ra browsers <<<"${BROWSERS//,/ }"
+browsers=(chromium)
+for browser in ${BROWSERS//,/ }; do
+	if [ "${browser}" != chromium ]; then
+		browsers+=("${browser}")
+	fi
+done
 
 "${NODE}" "${playwright_core}" install-deps "${browsers[@]}"
 "${NODE}" "${playwright_core}" install "${browsers[@]}"
