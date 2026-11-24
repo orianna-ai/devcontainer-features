@@ -41,12 +41,27 @@ fi
 
 curl -fsSL "${tarball_url}" -o "${staging}/package.tgz"
 
-binary_member="package/bin/agent-browser-linux-${arch}"
+tar -xzf "${staging}/package.tgz" -C "${staging}" package/skill-data
 
-tar -xzf "${staging}/package.tgz" -C "${staging}" "${binary_member}" package/skill-data
+binary="${staging}/package/bin/agent-browser-linux-${arch}"
 
-if [ ! -s "${staging}/${binary_member}" ]; then
-	echo "agent-browser@${VERSION} ships no ${binary_member}" >&2
+if ! tar -xzf "${staging}/package.tgz" -C "${staging}" "package/bin/agent-browser-linux-${arch}" 2>/dev/null; then
+	resolved="${tarball_url##*/agent-browser-}"
+	resolved="${resolved%.tgz}"
+	native="cli-linux-${arch}-gnu"
+
+	if ! curl -fsSL "${REGISTRY%/*}/@agent-browser/${native}/-/${native}-${resolved}.tgz" -o "${staging}/native.tgz"; then
+		echo "the registry has no @agent-browser/${native}@${resolved}" >&2
+		exit 1
+	fi
+
+	mkdir "${staging}/native"
+	tar -xzf "${staging}/native.tgz" -C "${staging}/native" package/bin/agent-browser
+	binary="${staging}/native/package/bin/agent-browser"
+fi
+
+if [ ! -s "${binary}" ]; then
+	echo "agent-browser@${VERSION} ships no linux ${arch} binary" >&2
 	exit 1
 fi
 
@@ -56,7 +71,7 @@ if [ ! -f "${staging}/package/skill-data/core/SKILL.md" ]; then
 fi
 
 rm -rf "${INSTALL_PATH}"
-install -D -m 0755 "${staging}/${binary_member}" "${INSTALL_PATH}/bin/agent-browser"
+install -D -m 0755 "${binary}" "${INSTALL_PATH}/bin/agent-browser"
 cp -R "${staging}/package/skill-data" "${INSTALL_PATH}/skill-data"
 
 ln -sfn "${INSTALL_PATH}/bin/agent-browser" /usr/local/bin/agent-browser
