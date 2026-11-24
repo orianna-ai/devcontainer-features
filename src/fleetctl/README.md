@@ -34,9 +34,6 @@ The binary is extracted from the release's `fleetctl_v<version>_linux_<arch>.tar
 shared-prefix shape the other features use: one root-owned copy, readable and executable by every
 user, writable by none of them.
 
-Upstream also publishes fleetctl on npm, but that package downloads the binary on first run. The
-feature takes the release tarball directly, so the binary is in the image.
-
 ## Version pinning
 
 `version` accepts an exact `X.Y.Z` release, which freezes the CLI into the image digest. The
