@@ -1,0 +1,22 @@
+{
+  "ubuntu": {
+    "features": {
+      "fleetctl": {
+        "version": "latest"
+      },
+      "ghcr.io/devcontainers/features/common-utils:2": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  },
+  "ubuntu_pinned": {
+    "features": {
+      "fleetctl": {
+        "version": "4.94.1"
+      },
+      "ghcr.io/devcontainers/features/common-utils:2": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "user": "vscode"
+  }
+}
