@@ -23,6 +23,11 @@ serves_the_bundled_skills() {
 		agent-browser skills list | grep -q '^  core '
 }
 
+# Since 0.43.0 the main package's bin is a node launcher; the binary is in a per-platform package.
+is_the_native_binary() {
+	test "$(head -c 4 "${INSTALL_PATH}/bin/agent-browser" | od -An -c | tr -d ' ')" = '177ELF'
+}
+
 no_node_on_path() {
 	! command -v node >/dev/null 2>&1 &&
 		! command -v npm >/dev/null 2>&1
@@ -37,6 +42,7 @@ not_writable_by_remote_user() {
 check 'check the image has no node of its own' no_node_on_path
 check 'check if agent-browser exists' bash -c "command -v agent-browser"
 check 'check if agent-browser runs' bash -c "agent-browser --version"
+check 'check if agent-browser is the native binary' is_the_native_binary
 check 'check if agent-browser resolves inside the shared prefix' resolves_inside_the_shared_prefix
 check 'check if agent-browser serves the bundled skills' serves_the_bundled_skills
 check 'check if the shared install is read-only to the remote user' not_writable_by_remote_user

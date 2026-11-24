@@ -3,7 +3,7 @@ set -euo pipefail
 
 VERSION="${VERSION:-latest}"
 INSTALL_PATH="/usr/local/share/agent-browser"
-REGISTRY="https://registry.npmjs.org/agent-browser"
+REGISTRY="https://registry.npmjs.org"
 
 if ! command -v curl >/dev/null 2>&1; then
 	echo "curl was not found; it is needed to fetch the agent-browser package" >&2
@@ -27,37 +27,56 @@ esac
 staging="$(mktemp -d)"
 trap 'rm -rf "${staging}"' EXIT
 
-if ! curl -fsSL "${REGISTRY}/${VERSION}" -o "${staging}/metadata.json"; then
-	echo "the registry has no agent-browser@${VERSION}" >&2
+fetch_package() {
+	local package="$1" version="$2" name="$3" tarball_url
+
+	if ! curl -fsSL "${REGISTRY}/${package}/${version}" -o "${staging}/${name}.json"; then
+		echo "the registry has no ${package}@${version}" >&2
+		exit 1
+	fi
+
+	tarball_url="$(tr ',' '\n' <"${staging}/${name}.json" | sed -n 's/.*"tarball":"\([^"]*\)".*/\1/p' | head -n1)"
+
+	if [ -z "${tarball_url}" ]; then
+		echo "the registry returned no tarball for ${package}@${version}" >&2
+		exit 1
+	fi
+
+	curl -fsSL "${tarball_url}" -o "${staging}/${name}.tgz"
+	mkdir -p "${staging}/${name}"
+	tar -xzf "${staging}/${name}.tgz" -C "${staging}/${name}"
+}
+
+fetch_package agent-browser "${VERSION}" main
+
+resolved_version="$(sed -n 's/^  "version": "\([^"]*\)",\{0,1\}$/\1/p' "${staging}/main/package/package.json" | head -n1)"
+
+if [ -z "${resolved_version}" ]; then
+	echo "agent-browser@${VERSION} ships no version in its package.json" >&2
 	exit 1
 fi
 
-tarball_url="$(tr ',' '\n' <"${staging}/metadata.json" | sed -n 's/.*"tarball":"\([^"]*\)".*/\1/p' | head -n1)"
+binary="${staging}/main/package/bin/agent-browser-linux-${arch}"
 
-if [ -z "${tarball_url}" ]; then
-	echo "the registry returned no tarball for agent-browser@${VERSION}" >&2
+if [ ! -e "${binary}" ]; then
+	native_package="@agent-browser/cli-linux-${arch}-gnu"
+	fetch_package "${native_package}" "${resolved_version}" native
+	binary="${staging}/native/package/bin/agent-browser"
+fi
+
+if [ ! -s "${binary}" ]; then
+	echo "agent-browser@${resolved_version} ships no linux ${arch} binary" >&2
 	exit 1
 fi
 
-curl -fsSL "${tarball_url}" -o "${staging}/package.tgz"
-
-binary_member="package/bin/agent-browser-linux-${arch}"
-
-tar -xzf "${staging}/package.tgz" -C "${staging}" "${binary_member}" package/skill-data
-
-if [ ! -s "${staging}/${binary_member}" ]; then
-	echo "agent-browser@${VERSION} ships no ${binary_member}" >&2
-	exit 1
-fi
-
-if [ ! -f "${staging}/package/skill-data/core/SKILL.md" ]; then
-	echo "agent-browser@${VERSION} ships no skill-data/core/SKILL.md" >&2
+if [ ! -f "${staging}/main/package/skill-data/core/SKILL.md" ]; then
+	echo "agent-browser@${resolved_version} ships no skill-data/core/SKILL.md" >&2
 	exit 1
 fi
 
 rm -rf "${INSTALL_PATH}"
-install -D -m 0755 "${staging}/${binary_member}" "${INSTALL_PATH}/bin/agent-browser"
-cp -R "${staging}/package/skill-data" "${INSTALL_PATH}/skill-data"
+install -D -m 0755 "${binary}" "${INSTALL_PATH}/bin/agent-browser"
+cp -R "${staging}/main/package/skill-data" "${INSTALL_PATH}/skill-data"
 
 ln -sfn "${INSTALL_PATH}/bin/agent-browser" /usr/local/bin/agent-browser
 

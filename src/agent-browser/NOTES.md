@@ -19,10 +19,17 @@ The binary is copied to `/usr/local/share/agent-browser/bin/agent-browser` and s
 `/usr/local/bin/agent-browser`, the same shared-prefix shape the other features use: one root-owned
 copy, readable and executable by every user, writable by none of them.
 
-The published package is the source rather than the matching GitHub release asset, which carries
-the binary alone. The package holds every platform's binary *and* the bundled skills, so one
-download answers both halves of the install; only this platform's binary and `skill-data` are
-unpacked, and the rest of the tarball is discarded with the staging directory.
+The npm registry is the source rather than the matching GitHub release asset, which carries the
+binary alone. Since 0.43.0 the install is two downloads: the `agent-browser` package holds the
+bundled skills and a node launcher, and the binary comes from the platform package the launcher
+would have resolved through `optionalDependencies` — `@agent-browser/cli-linux-x64-gnu` on amd64,
+`@agent-browser/cli-linux-arm64-gnu` on arm64 — fetched at the same version. The `-gnu` builds are
+the right ones because the feature only supports Debian and Ubuntu.
+
+Releases up to 0.42.0 shipped every platform's binary inside the main package. The installer still
+takes the binary from there when it finds one, so a `version` pinned to an older release keeps
+working. Either way only the binary and `skill-data` are kept; the launcher and everything else is
+discarded with the staging directory.
 
 ## Skills
 
@@ -68,8 +75,8 @@ the life of the image, and moves only when the image is rebuilt. That is the poi
 here rather than at container start: every container from a given image runs a known version
 instead of whatever was newest when it happened to boot.
 
-Because the skills come out of the same tarball as the binary, a pinned CLI serves the skills that
-were written for it.
+Because the skills and the binary are always fetched at the same version, a pinned CLI serves the
+skills that were written for it.
 
 ## Authentication
 

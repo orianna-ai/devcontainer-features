@@ -5,7 +5,9 @@ set -e
 source \
 	dev-container-features-test-lib
 
-# Matches scenarios.json; bump both together if this release is ever withdrawn.
+# Matches scenarios.json. Deliberately a release from before 0.43.0, when the binary still shipped
+# inside the main package: the latest scenario covers the per-platform packages, this one the old
+# layout. If this release is ever withdrawn, bump both to another one below 0.43.0.
 PINNED_VERSION=0.35.0
 
 installs_the_pinned_version() {
