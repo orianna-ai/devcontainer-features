@@ -1,0 +1,16 @@
+{
+  "description": "Installs fleetctl, the Fleet CLI.",
+  "id": "fleetctl",
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/common-utils"
+  ],
+  "name": "fleetctl",
+  "options": {
+    "version": {
+      "default": "latest",
+      "description": "Version of fleetctl to install, as X.Y.Z, or latest for the newest release.",
+      "type": "string"
+    }
+  },
+  "version": "1.0.0"
+}
