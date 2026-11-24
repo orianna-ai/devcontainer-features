@@ -20,15 +20,11 @@ aarch64 | arm64) arch=arm64 ;;
 esac
 
 if [ "${VERSION}" = "latest" ]; then
-	# Release assets carry the version in their name, so resolve the newest tag first.
-	tag="$(curl -fsSL -o /dev/null -w '%{url_effective}' "${RELEASES_URL}/latest")"
-	tag="${tag##*/}"
-	if [[ ! ${tag} =~ ^fleet-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-		echo "the newest fleetdm/fleet release is ${tag}, not a fleet-vX.Y.Z release; pin version" >&2
-		exit 1
-	fi
-	VERSION="${tag#fleet-v}"
-elif [[ ! ${VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	latest_url="$(curl -fsSL -o /dev/null -w '%{url_effective}' "${RELEASES_URL}/latest")"
+	VERSION="${latest_url##*/fleet-v}"
+fi
+
+if [[ ! ${VERSION} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 	echo "version must be X.Y.Z or latest, not ${VERSION}" >&2
 	exit 1
 fi
