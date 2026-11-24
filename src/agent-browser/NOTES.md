@@ -19,10 +19,12 @@ The binary is copied to `/usr/local/share/agent-browser/bin/agent-browser` and s
 `/usr/local/bin/agent-browser`, the same shared-prefix shape the other features use: one root-owned
 copy, readable and executable by every user, writable by none of them.
 
-The published package is the source rather than the matching GitHub release asset, which carries
-the binary alone. The package holds every platform's binary *and* the bundled skills, so one
-download answers both halves of the install; only this platform's binary and `skill-data` are
-unpacked, and the rest of the tarball is discarded with the staging directory.
+The published packages are the source rather than the matching GitHub release asset, which carries
+the binary alone. The `agent-browser` package holds the bundled skills, and from 0.44.0 the binary
+ships in a package per platform, `@agent-browser/cli-linux-<arch>-gnu`, at the same version. Older
+releases carried every platform's binary in `agent-browser` itself, so the feature looks there first
+and fetches the platform package only when it finds none. Only this platform's binary and
+`skill-data` are unpacked, and the rest is discarded with the staging directory.
 
 ## Skills
 
@@ -68,8 +70,8 @@ the life of the image, and moves only when the image is rebuilt. That is the poi
 here rather than at container start: every container from a given image runs a known version
 instead of whatever was newest when it happened to boot.
 
-Because the skills come out of the same tarball as the binary, a pinned CLI serves the skills that
-were written for it.
+Because the skills and the binary are fetched at the same version, a pinned CLI serves the skills
+that were written for it.
 
 ## Authentication
 
