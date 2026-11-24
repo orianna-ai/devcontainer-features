@@ -10,7 +10,7 @@ The binary goes to `/usr/local/share/agent-browser/bin/agent-browser` and is sym
 `/usr/local/bin/agent-browser`: one root-owned copy, executable by every user and writable by none.
 
 Both halves of the install come from npm at the same version. The `agent-browser` package holds the
-bundled skills. The binary ships in `@agent-browser/cli-linux-<arch>-gnu` from 0.44.0, and inside
+bundled skills. The binary ships in `@agent-browser/cli-linux-<arch>-gnu` from 0.43.0, and inside
 `agent-browser` itself before that, so the feature looks there first.
 
 ## Skills
